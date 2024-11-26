@@ -16,15 +16,15 @@ TIMERS = 20
 client = None
 server = None
 
-# def run_subprocess(command, expected_returncode=0):
-#     """Run a shell command and return the output."""
-#     result = subprocess.run(
-#         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-#     )
-#     if result.stderr:
-#         print(result.stderr.decode('utf-8'))
-#     assert result.returncode == expected_returncode
-#     return result.stdout.decode('utf-8')
+def run_subprocess(command, expected_returncode=0):
+    """Run a shell command and return the output."""
+    result = subprocess.run(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
+    if result.stderr:
+        print(result.stderr.decode('utf-8'))
+    assert result.returncode == expected_returncode
+    return result.stdout.decode('utf-8')
 
 def test_connection(client, server):
     """Test the connection between client and server using ping."""
@@ -96,6 +96,8 @@ if __name__ == "__main__":
     topo = ExperimentTopo()
     net = Mininet(topo=topo, link=TCLink)
     net.start()
+
+    subprocess.run(["ip", "netns", "list"])
 
     # Get client and server hosts
     client = net.get("h1")
