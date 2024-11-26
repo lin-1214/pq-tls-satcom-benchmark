@@ -51,12 +51,13 @@ def time_handshake(host, kex_alg, measurements):
 
 def time_handshake_task(args):
     """Helper function to unpack arguments for time_handshake."""
-    host, kex_alg, measurements = args
+    net, host_name, kex_alg, measurements = args
+    host = net.get(host_name)
     return time_handshake(host, kex_alg, measurements)
 
-def run_timers(host, kex_alg, timer_pool):
+def run_timers(net, host_name, kex_alg, timer_pool):
     """Run multiple timer measurements for a key exchange algorithm."""
-    tasks = [(host, kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS
+    tasks = [(net, host_name, kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS
     results_nested = timer_pool.starmap(time_handshake_task, tasks)
     return [item for sublist in results_nested for item in sublist]
 
@@ -119,7 +120,7 @@ if __name__ == "__main__":
                     change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
 
                     # Measure handshake times
-                    results = run_timers(client, kex_alg, timer_pool)
+                    results = run_timers(net, "h1", kex_alg, timer_pool)
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
 
