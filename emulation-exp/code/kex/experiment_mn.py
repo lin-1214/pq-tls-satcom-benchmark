@@ -28,10 +28,9 @@ def test_connection(client, server):
     print("Testing connection between client and server...")
     result = client.cmd(f"ping -c 3 {server.IP()}")
     if "0% packet loss" in result:
-        print("Connection test passed: No packet loss.")
+        print("✅ Connection test passed: No packet loss.")
     else:
-        print("Connection test failed: Packet loss detected.")
-    print(result)
+        print("❌ Connection test failed: Packet loss detected.")
 
 def change_qdisc(host, intf, pkt_loss, delay):
     """Apply packet loss and delay using NetEm in Mininet."""
@@ -95,31 +94,31 @@ if __name__ == "__main__":
     # Create thread pool for parallel processing
     timer_pool = Pool(processes=POOL_SIZE)
 
-    # # Create data directory
-    # if not os.path.exists("data"):
-    #     os.makedirs("data")
+    # Create data directory
+    if not os.path.exists("mn_data"):
+        os.makedirs("mn_data")
 
-    # # Experiment loop
-    # for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
-    #     # Configure base delay
-    #     change_qdisc(client, "h1-eth0", 0, latency_ms)
-    #     change_qdisc(server, "h2-eth0", 0, latency_ms)
-    #     rtt_str = get_rtt_ms(client, server)
+    # Experiment loop
+    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
+        # Configure base delay
+        change_qdisc(client, "h1-eth0", 0, latency_ms)
+        change_qdisc(server, "h2-eth0", 0, latency_ms)
+        rtt_str = get_rtt_ms(client, server)
 
-    #     for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_frodo640aes", "p256_sikep434"]:
-    #         # Open CSV file for results
-    #         with open(f"data/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
-    #             csv_writer = csv.writer(out_file)
+        for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_frodo640aes", "p256_sikep434"]:
+            # Open CSV file for results
+            with open(f"mn_data/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
+                csv_writer = csv.writer(out_file)
 
-    #             # Test different packet loss rates
-    #             for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 21)):
-    #                 change_qdisc(client, "h1-eth0", pkt_loss, latency_ms)
-    #                 change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
+                # Test different packet loss rates
+                for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 21)):
+                    change_qdisc(client, "h1-eth0", pkt_loss, latency_ms)
+                    change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
 
-    #                 # Measure handshake times
-    #                 results = run_timers(client, kex_alg, timer_pool)
-    #                 results.insert(0, pkt_loss)
-    #                 csv_writer.writerow(results)
+                    # Measure handshake times
+                    results = run_timers(client, kex_alg, timer_pool)
+                    results.insert(0, pkt_loss)
+                    csv_writer.writerow(results)
 
     # Cleanup
     timer_pool.close()
