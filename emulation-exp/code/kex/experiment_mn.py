@@ -52,6 +52,7 @@ def time_handshake(kex_alg, measurements):
     try:
         result = client.cmd(command)
         # print(f"[DEBUG] Command output: {result}")
+        print(f"[DEBUG] Result: {result}")
         return [float(i) for i in result.strip().split(",")]
     except Exception as e:
         print(f"[ERROR] Error executing command on client: {e}")
