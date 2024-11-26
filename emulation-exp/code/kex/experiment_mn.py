@@ -49,6 +49,7 @@ def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     command = f"sh ./s_timer.o {kex_alg} {measurements}"
     # print(f"[DEBUG] Executing command on client: {command}")
+    print(f"[DEBUG] Client: {client}")
     
     result = client.cmd(command)
     # print(f"[DEBUG] Command output: {result}")
