@@ -21,3 +21,9 @@
 3. To run the signature experiments, navigate to `sig`, and run `./setup.sh` followed by `./run.sh`. To cleanup, run `./teardown.sh`.
 
 Make sure to cleanup before switching from the key-exchange experiments to the signature ones and vice-versa.
+
+========================================
+
+## Modifications
+
+1. Use Mininet to setup the network namespaces instead of the script `setup_ns.sh`.

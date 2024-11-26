@@ -14,10 +14,13 @@ NGINX_CONF_DIR=${ROOT}/tmp/nginx/conf
 ##########################
 make s_timer.o
 
-##########################
-# Setup network namespaces
-##########################
-${ROOT}/setup_ns.sh
+# ##########################
+# # Setup network namespaces
+# ##########################
+# ${ROOT}/setup_ns.sh
+
+# Setup Mininet
+${ROOT}/setup_mn.sh
 
 ##########################
 # Generate ECDSA P-256 cert
@@ -38,4 +41,5 @@ ${OPENSSL} x509 -req -in ${NGINX_CONF_DIR}/server.csr -out ${NGINX_CONF_DIR}/ser
 # Start nginx
 ##########################
 cp nginx.conf ${NGINX_CONF_DIR}/nginx.conf
-ip netns exec srv_ns ${NGINX_APP}
+
+# ip netns exec srv_ns ${NGINX_APP}
