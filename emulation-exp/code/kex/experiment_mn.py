@@ -11,7 +11,7 @@ import subprocess
 # Experiment settings
 POOL_SIZE = 4
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 50
+TIMERS = 20
 
 client = None
 server = None
