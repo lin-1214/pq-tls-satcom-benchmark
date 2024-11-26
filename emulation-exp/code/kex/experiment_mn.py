@@ -13,6 +13,9 @@ POOL_SIZE = 4
 MEASUREMENTS_PER_TIMER = 100
 TIMERS = 50
 
+client = None
+server = None
+
 def run_subprocess(command, expected_returncode=0):
     """Run a shell command and return the output."""
     result = subprocess.run(
@@ -43,22 +46,21 @@ def change_qdisc(host, intf, pkt_loss, delay):
     print(f"{host.name}: {command}")
     host.cmd(command)
 
-def time_handshake(host, kex_alg, measurements):
+def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     command = f"./s_timer.o {kex_alg} {measurements}"
-    result = host.cmd(command)
+    result = client.cmd(command)
     return [float(i) for i in result.strip().split(",")]
 
-def time_handshake_task(args):
-    """Helper function to unpack arguments for time_handshake."""
-    net, host_name, kex_alg, measurements = args
-    host = net.get(host_name)
-    return time_handshake(host, kex_alg, measurements)
+# def time_handshake_task(args):
+#     """Helper function to unpack arguments for time_handshake."""
+#     host, kex_alg, measurements = args
+#     return time_handshake(host, kex_alg, measurements)
 
-def run_timers(net, host_name, kex_alg, timer_pool):
+def run_timers(kex_alg, timer_pool):
     """Run multiple timer measurements for a key exchange algorithm."""
-    tasks = [(net, host_name, kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS
-    results_nested = timer_pool.starmap(time_handshake_task, tasks)
+    tasks = [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS
+    results_nested = timer_pool.starmap(time_handshake, tasks)
     return [item for sublist in results_nested for item in sublist]
 
 def get_rtt_ms(client, server):
@@ -120,7 +122,7 @@ if __name__ == "__main__":
                     change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
 
                     # Measure handshake times
-                    results = run_timers(net, "h1", kex_alg, timer_pool)
+                    results = run_timers(kex_alg, timer_pool)
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
 
