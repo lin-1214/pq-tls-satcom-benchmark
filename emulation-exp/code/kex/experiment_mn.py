@@ -4,7 +4,6 @@ from mininet.net import Mininet
 from mininet.node import Host
 from mininet.link import TCLink
 from mininet.topo import Topo
-from mininet.cli import CLI
 import os
 import subprocess
 
@@ -48,7 +47,7 @@ def change_qdisc(host, intf, pkt_loss, delay):
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    command = f"./s_timer.o {kex_alg} {str(measurements)}"
+    command = f"sh ./s_timer.o {kex_alg} {str(measurements)}"
     print(f"[DEBUG] Executing command on client: {command}")
     try:
         result = client.cmd(command)
