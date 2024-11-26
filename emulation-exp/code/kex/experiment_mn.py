@@ -47,31 +47,25 @@ def change_qdisc(host, intf, pkt_loss, delay):
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    command = f"sh ./s_timer.o {kex_alg} {str(measurements)}"
-    print(f"[DEBUG] Executing command on client: {command}")
+    command = f"sh ./s_timer.o {kex_alg} {measurements}"
+    # print(f"[DEBUG] Executing command on client: {command}")
     try:
         result = client.cmd(command)
-        print(f"[DEBUG] Command output: {result}")
+        # print(f"[DEBUG] Command output: {result}")
         return [float(i) for i in result.strip().split(",")]
     except Exception as e:
         print(f"[ERROR] Error executing command on client: {e}")
         return []
 
-# def time_handshake_task(args):
-#     """Helper function to unpack arguments for time_handshake."""
-#     host, kex_alg, measurements = args
-#     return time_handshake(host, kex_alg, measurements)
 
-def run_timers(kex_alg):
-    """Run multiple timer measurements for a key exchange algorithm sequentially."""
-    print(f"[DEBUG] Starting run_timers for {kex_alg}")
-    results = []
-    for i in range(TIMERS):
-        print(f"[DEBUG] Timer iteration {i+1}/{TIMERS} for {kex_alg}")
-        result = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
-        results.extend(result)
-        print(f"[DEBUG] Results after iteration {i+1}: {results}")
-    print(f"[DEBUG] Completed run_timers for {kex_alg}")
+
+def run_timers(kex_alg, timer_pool):
+    """Run multiple timer measurements for a key exchange algorithm in parallel."""
+    # print(f"[DEBUG] Starting run_timers for {kex_alg}")
+    # Use starmap to run time_handshake in parallel
+    results_nested = timer_pool.starmap(time_handshake, [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
+    results = [item for sublist in results_nested for item in sublist]
+    # print(f"[DEBUG] Completed run_timers for {kex_alg}")
     return results
 
 def get_rtt_ms(client, server):
@@ -96,7 +90,7 @@ if __name__ == "__main__":
     net = Mininet(topo=topo, link=TCLink)
     net.start()
 
-    subprocess.run(["ip", "netns", "list"])
+    # subprocess.run(["ip", "netns", "list"])
 
     # Get client and server hosts
     client = net.get("h1")
@@ -135,7 +129,7 @@ if __name__ == "__main__":
                     change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
 
                     # Measure handshake times
-                    results = run_timers(kex_alg)
+                    results = run_timers(kex_alg, timer_pool)
                     print(f"Results for {kex_alg} with {pkt_loss}% packet loss: {results}")
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
