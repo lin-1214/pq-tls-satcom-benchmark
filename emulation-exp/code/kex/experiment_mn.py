@@ -49,12 +49,15 @@ def time_handshake(host, kex_alg, measurements):
     result = host.cmd(command)
     return [float(i) for i in result.strip().split(",")]
 
+def time_handshake_task(args):
+    """Helper function to unpack arguments for time_handshake."""
+    host, kex_alg, measurements = args
+    return time_handshake(host, kex_alg, measurements)
+
 def run_timers(host, kex_alg, timer_pool):
     """Run multiple timer measurements for a key exchange algorithm."""
-    results_nested = timer_pool.starmap(
-        lambda alg, m: time_handshake(host, alg, m),
-        [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS,
-    )
+    tasks = [(host, kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS
+    results_nested = timer_pool.starmap(time_handshake_task, tasks)
     return [item for sublist in results_nested for item in sublist]
 
 def get_rtt_ms(client, server):
