@@ -16,15 +16,15 @@ TIMERS = 20
 client = None
 server = None
 
-def run_subprocess(command, expected_returncode=0):
-    """Run a shell command and return the output."""
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-    )
-    if result.stderr:
-        print(result.stderr.decode('utf-8'))
-    assert result.returncode == expected_returncode
-    return result.stdout.decode('utf-8')
+# def run_subprocess(command, expected_returncode=0):
+#     """Run a shell command and return the output."""
+#     result = subprocess.run(
+#         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+#     )
+#     if result.stderr:
+#         print(result.stderr.decode('utf-8'))
+#     assert result.returncode == expected_returncode
+#     return result.stdout.decode('utf-8')
 
 def test_connection(client, server):
     """Test the connection between client and server using ping."""
@@ -48,7 +48,7 @@ def change_qdisc(host, intf, pkt_loss, delay):
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    command = f"./s_timer.o {kex_alg} {measurements}"
+    command = f"./s_timer.o {kex_alg} {str(measurements)}"
     result = client.cmd(command)
     return [float(i) for i in result.strip().split(",")]
 
@@ -109,6 +109,7 @@ if __name__ == "__main__":
         change_qdisc(client, "h1-eth0", 0, latency_ms)
         change_qdisc(server, "h2-eth0", 0, latency_ms)
         rtt_str = get_rtt_ms(client, server)
+        print(f"✅ RTT measurement success! RTT: {rtt_str}")
 
         for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_frodo640aes", "p256_sikep434"]:
             # Open CSV file for results
