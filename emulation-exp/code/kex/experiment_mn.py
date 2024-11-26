@@ -66,7 +66,6 @@ def run_timers(kex_alg, timer_pool):
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
     result = client.cmd(f"ping {server.IP()} -c 30")
-    print(result)
     lines = result.splitlines()
     rtt_line = [line for line in lines if "rtt" in line][0]
     avg_rtt = rtt_line.split("/")[4]
@@ -123,6 +122,7 @@ if __name__ == "__main__":
 
                     # Measure handshake times
                     results = run_timers(kex_alg, timer_pool)
+                    print(f"Results for {kex_alg} with {pkt_loss}% packet loss: {results}")
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
 
