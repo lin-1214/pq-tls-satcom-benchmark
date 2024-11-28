@@ -36,7 +36,7 @@ def test_connection(client, server):
 
     print("Testing nginx connection...")
     print(f"Curling {server.IP()}:4433")
-    curl_result = client.cmd(f"curl http://{server.IP()}:4433")
+    curl_result = client.cmd(f"curl -k https://{server.IP()}:4433")
     if curl_result:
         print("✅ Nginx test passed: Received response from server")
         print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
@@ -63,23 +63,18 @@ def time_handshake(kex_alg, measurements):
     
     command = f"./s_timer.o {kex_alg} {measurements}"
     # command = f"sh ./test.sh"
-    print(f"[DEBUG] Client: {client}")
-
     result = client.cmd(command)
-    print(f"[DEBUG] Result: {result}")
-
     return [float(i) for i in result.strip().split(",")]
     
 
 
 
 def run_timers(kex_alg, timer_pool):
-    """Run multiple timer measurements for a key exchange algorithm in parallel."""
-    # print(f"[DEBUG] Starting run_timers for {kex_alg}")
-    # Use starmap to run time_handshake in parallel
-    results_nested = timer_pool.starmap(time_handshake, [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-    results = [item for sublist in results_nested for item in sublist]
-    # print(f"[DEBUG] Completed run_timers for {kex_alg}")
+    """Run multiple timer measurements for a key exchange algorithm sequentially."""
+    results = []
+    for _ in range(TIMERS):
+        measurements = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
+        results.extend(measurements)
     return results
 
 def get_rtt_ms(client, server):
@@ -130,9 +125,6 @@ if __name__ == "__main__":
     # Test connection
     test_connection(client, server)
 
-    # Create thread pool for parallel processing
-    timer_pool = Pool(processes=POOL_SIZE)
-
     # Create data directory
     if not os.path.exists("mn_data"):
         os.makedirs("mn_data")
@@ -162,6 +154,4 @@ if __name__ == "__main__":
                     csv_writer.writerow(results)
 
     # Cleanup
-    timer_pool.close()
-    timer_pool.join()
     net.stop()
