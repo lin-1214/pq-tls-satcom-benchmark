@@ -54,20 +54,19 @@ def time_handshake(kex_alg, measurements):
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
 
-    print(f"[DEBUG] Result: {result}")
+    if result:
+        print(result.split(","))
+    else:
+        return []
 
-    results = []
-    for i in result.strip().split(","):
-        if i:
-            results.append(float(i))
-    return results
+    # return [float(i) for i in result.strip().split(",")]
 
 def run_timers(kex_alg):
     """Run multiple timer measurements for a key exchange algorithm using multiprocessing."""
     with Pool(processes=POOL_SIZE) as timer_pool:
         results_nested = timer_pool.starmap(time_handshake, 
             [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-        return [item for sublist in results_nested for item in sublist]
+        return [item for sublist in results_nested for item in sublist if sublist]
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
