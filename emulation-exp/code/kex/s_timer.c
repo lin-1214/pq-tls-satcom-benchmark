@@ -11,7 +11,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-#include <time.h
+#include <time.h>
 
 #define NS_IN_MS 1000000.0
 #define MS_IN_S 1000
