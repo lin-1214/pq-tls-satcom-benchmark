@@ -36,10 +36,10 @@ def test_connection(client, server):
 
     print("Testing nginx connection...")
     print(f"Curling {server.IP()}")
-    curl_result = client.cmd(f"curl -k https://{server.IP()}")
+    curl_result = client.cmd(f"curl -k https://{server.IP()} -p 4433")
     if curl_result:
         print("✅ Nginx test passed: Received response from server")
-        print(f"Response: {curl_result[:100]}...")  # Show first 100 chars of response
+        print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
     else:
         print("❌ Nginx test failed: No response from server")
         print("Debugging info:")
