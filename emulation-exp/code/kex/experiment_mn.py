@@ -39,7 +39,7 @@ def test_connection(client, server):
     curl_result = client.cmd(f"curl -k https://{server.IP()}:4433")
     if curl_result:
         print("✅ Nginx test passed: Received response from server")
-        print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
+        # print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
     else:
         print("❌ Nginx test failed: No response from server")
         print("Debugging info:")
@@ -60,16 +60,13 @@ def change_qdisc(host, intf, pkt_loss, delay):
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    
     command = f"./s_timer.o {kex_alg} {measurements}"
     # command = f"sh ./test.sh"
     result = client.cmd(command)
     return [float(i) for i in result.strip().split(",")]
-    
 
 
-
-def run_timers(kex_alg, timer_pool):
+def run_timers(kex_alg):
     """Run multiple timer measurements for a key exchange algorithm sequentially."""
     results = []
     for _ in range(TIMERS):
@@ -148,7 +145,7 @@ if __name__ == "__main__":
                     change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
 
                     # Measure handshake times
-                    results = run_timers(kex_alg, timer_pool)
+                    results = run_timers(kex_alg)
                     print(f"Results for {kex_alg} with {pkt_loss}% packet loss: {results}")
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
