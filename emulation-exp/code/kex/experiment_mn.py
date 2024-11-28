@@ -123,8 +123,8 @@ if __name__ == "__main__":
     test_connection(client, server)
 
     # Create data directory
-    if not os.path.exists("mn_data"):
-        os.makedirs("mn_data")
+    if not os.path.exists("../../mn_data/kex"):
+        os.makedirs("../../mn_data/kex")
 
     # Experiment loop
     for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
         for kex_alg in ["prime256v1", "p256_kyber512_90s"]:
             # Open CSV file for results
-            with open(f"mn_data/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
+            with open(f"../../mn_data/kex/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
                 csv_writer = csv.writer(out_file)
 
                 # Test different packet loss rates
