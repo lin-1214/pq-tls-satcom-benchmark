@@ -16,16 +16,6 @@ TIMERS = 20
 client = None
 server = None
 
-def run_subprocess(command, expected_returncode=0):
-    """Run a shell command and return the output."""
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-    )
-    if result.stderr:
-        print(result.stderr.decode('utf-8'))
-    assert result.returncode == expected_returncode
-    return result.stdout.decode('utf-8')
-
 def test_connection(client, server):
     """Test the connection between client and server using ping."""
     print("Testing connection between client and server...")
@@ -64,7 +54,7 @@ def time_handshake(kex_alg, measurements):
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
 
-    # print(f"[DEBUG] Result: {result}")
+    print(f"[DEBUG] Result: {result}")
 
     results = []
     for i in result.strip().split(","):
