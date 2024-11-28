@@ -54,8 +54,14 @@ def time_handshake(kex_alg, measurements):
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
 
+    results = []
     if result:
         print(result.split(","))
+        for i in result.split(","):
+            print(i)
+            results.append(float(i))
+        
+        return results
     else:
         return []
 
