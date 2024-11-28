@@ -58,21 +58,19 @@ def change_qdisc(host, intf, pkt_loss, delay):
     print(f"{host.name}: {command}")
     host.cmd(command)
 
-def time_handshake(kex_alg, measurements):
+def time_handshake(args):
     """Run handshake timing test from a Mininet host."""
+    kex_alg, measurements = args
     command = f"./s_timer.o {kex_alg} {measurements}"
-    # command = f"sh ./test.sh"
     result = client.cmd(command)
     return [float(i) for i in result.strip().split(",")]
 
-
 def run_timers(kex_alg):
-    """Run multiple timer measurements for a key exchange algorithm sequentially."""
-    results = []
-    for _ in range(TIMERS):
-        measurements = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
-        results.extend(measurements)
-    return results
+    """Run multiple timer measurements for a key exchange algorithm using multiprocessing."""
+    with Pool(processes=POOL_SIZE) as timer_pool:
+        results_nested = timer_pool.map(time_handshake, 
+            [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
+        return [item for sublist in results_nested for item in sublist]
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
