@@ -134,7 +134,7 @@ if __name__ == "__main__":
         rtt_str = get_rtt_ms(client, server)
         print(f"✅ RTT measurement success! RTT: {rtt_str}")
 
-        for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_frodo640aes", "p256_sikep434"]:
+        for kex_alg in ["prime256v1", "p256_kyber512_90s"]:
             # Open CSV file for results
             with open(f"mn_data/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
                 csv_writer = csv.writer(out_file)
