@@ -77,7 +77,7 @@ def run_timers(kex_alg):
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
     result = client.cmd(f"ping {server.IP()} -c 30")
-    print(f"[DEBUG] Ping result: {result}")
+    # print(f"[DEBUG] Ping result: {result}")
     lines = result.splitlines()
     rtt_line = [line for line in lines if "rtt" in line][0]
     avg_rtt = rtt_line.split("/")[4]
@@ -130,8 +130,8 @@ if __name__ == "__main__":
     # Experiment loop
     for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
         # Configure base delay
-        change_qdisc(client, "h1-eth0", 0, latency_ms)
-        change_qdisc(server, "h2-eth0", 0, latency_ms)
+        change_qdisc(client, "h2-eth0", 0, latency_ms)
+        change_qdisc(server, "h1-eth0", 0, latency_ms)
         rtt_str = get_rtt_ms(client, server)
         print(f"✅ RTT measurement success! RTT: {rtt_str}")
 
@@ -142,8 +142,8 @@ if __name__ == "__main__":
 
                 # Test different packet loss rates
                 for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 21)):
-                    change_qdisc(client, "h1-eth0", pkt_loss, latency_ms)
-                    change_qdisc(server, "h2-eth0", pkt_loss, latency_ms)
+                    change_qdisc(client, "h2-eth0", pkt_loss, latency_ms)
+                    change_qdisc(server, "h1-eth0", pkt_loss, latency_ms)
 
                     # Measure handshake times
                     results = run_timers(kex_alg)

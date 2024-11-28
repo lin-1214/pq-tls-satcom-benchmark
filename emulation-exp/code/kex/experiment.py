@@ -66,6 +66,7 @@ def get_rtt_ms():
 
     print(" > " + " ".join(command))
     result = run_subprocess(command)
+    print(f"[DEBUG] Ping result: {result}")
 
     result_fmt = result.splitlines()[-1].split("/")
     return result_fmt[4].replace(".", "p")
