@@ -11,10 +11,20 @@ import sys
 # Experiment settings
 POOL_SIZE = 4
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 50
+TIMERS = 20
 
 client = None
 server = None
+
+def run_subprocess(command, expected_returncode=0):
+    """Run a shell command and return the output."""
+    result = subprocess.run(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+    )
+    if result.stderr:
+        print(result.stderr.decode('utf-8'))
+    assert result.returncode == expected_returncode
+    return result.stdout.decode('utf-8')
 
 def test_connection(client, server):
     """Test the connection between client and server using ping."""
@@ -53,20 +63,15 @@ def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
-
-    if result:
-        return [float(i) for i in result.strip().split(",") if i]
-    else:
-        return []
-
-    # return [float(i) for i in result.strip().split(",")]
+    return [float(i) for i in result.strip().split(",")]
 
 def run_timers(kex_alg):
-    """Run multiple timer measurements for a key exchange algorithm using multiprocessing."""
-    with Pool(processes=POOL_SIZE) as timer_pool:
-        results_nested = timer_pool.starmap(time_handshake, 
-            [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-        return [item for sublist in results_nested for item in sublist if sublist]
+    """Run multiple timer measurements for a key exchange algorithm sequentially."""
+    results = []
+    for _ in range(TIMERS):
+        measurements = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
+        results.extend(measurements)
+    return results
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
