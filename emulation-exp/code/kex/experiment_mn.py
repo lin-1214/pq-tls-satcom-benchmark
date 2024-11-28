@@ -47,13 +47,14 @@ def change_qdisc(host, intf, pkt_loss, delay):
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    command = f"sh ./s_timer.o {kex_alg} {measurements}"
-    # print(f"[DEBUG] Executing command on client: {command}")
-    print(f"[DEBUG] Client: {client}")
     
+    # command = f"sh ./s_timer.o {kex_alg} {measurements}"
+    command = f"sh ./test.sh"
+    print(f"[DEBUG] Client: {client}")
+
     result = client.cmd(command)
-    # print(f"[DEBUG] Command output: {result}")
     print(f"[DEBUG] Result: {result}")
+
     return [float(i) for i in result.strip().split(",")]
     
 

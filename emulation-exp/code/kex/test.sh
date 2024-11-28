@@ -1,0 +1,8 @@
+echo "🎮 Welcome to the Test Script! 🚀"
+echo ""
+echo "     /\___/\\"
+echo "    (  o o  )"
+echo "    (  =^=  )"
+echo "     (____)"
+echo ""
+echo "Let's get started! 🎯"
