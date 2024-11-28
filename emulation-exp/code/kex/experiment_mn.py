@@ -35,15 +35,15 @@ def test_connection(client, server):
         print("❌ Connection test failed: Packet loss detected.")
 
     print("Testing nginx connection...")
-    print(f"Curling {server.IP()}")
-    curl_result = client.cmd(f"curl -k https://{server.IP()}:4433")
+    print(f"Curling {server.IP()}:4433")
+    curl_result = client.cmd(f"curl http://{server.IP()}:4433")
     if curl_result:
         print("✅ Nginx test passed: Received response from server")
         print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
     else:
         print("❌ Nginx test failed: No response from server")
         print("Debugging info:")
-        print(client.cmd(f"curl -k -v https://{server.IP()}:4433"))
+        print(client.cmd(f"curl -v http://{server.IP()}:4433"))
         net.stop()
         sys.exit(1)
 
@@ -61,7 +61,7 @@ def change_qdisc(host, intf, pkt_loss, delay):
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     
-    command = f"sh ./s_timer.o {kex_alg} {measurements}"
+    command = f"./s_timer.o {kex_alg} {measurements}"
     # command = f"sh ./test.sh"
     print(f"[DEBUG] Client: {client}")
 
@@ -121,8 +121,8 @@ if __name__ == "__main__":
     client.cmd("tc qdisc add dev h2-eth0 root netem")
     server.cmd("tc qdisc add dev h1-eth0 root netem")
 
-    server.cmd("ifconfig h1-eth0 10.0.0.1/24 up")
-    client.cmd("ifconfig h2-eth0 10.0.0.2/24 up")
+    # server.cmd("ifconfig h1-eth0 10.0.0.1/24 up")
+    # client.cmd("ifconfig h2-eth0 10.0.0.2/24 up")
 
     # Start nginx on server
     server.cmd(f"{nginx_path} -c {nginx_conf_dir}")
