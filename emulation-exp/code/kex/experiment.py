@@ -3,6 +3,7 @@ from multiprocessing import Pool
 import os
 import subprocess
 
+
 # Our experiment used POOL_SIZE = 40
 POOL_SIZE = 4
 
@@ -74,6 +75,8 @@ timer_pool = Pool(processes=POOL_SIZE)
 
 if not os.path.exists('data'):
     os.makedirs('data')
+
+if 
 
 for latency_ms in ['2.684ms', '15.458ms', '39.224ms', '97.73ms']:
     # To get actual (emulated) RTT

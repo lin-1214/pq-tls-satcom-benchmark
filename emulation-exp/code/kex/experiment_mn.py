@@ -6,7 +6,7 @@ from mininet.link import TCLink
 from mininet.topo import Topo
 import os
 import subprocess
-
+import sys
 # Experiment settings
 POOL_SIZE = 4
 MEASUREMENTS_PER_TIMER = 100
@@ -34,6 +34,19 @@ def test_connection(client, server):
     else:
         print("❌ Connection test failed: Packet loss detected.")
 
+    print("Testing nginx connection...")
+    print(f"Curling {server.IP()}")
+    curl_result = client.cmd(f"curl -k https://{server.IP()}")
+    if curl_result:
+        print("✅ Nginx test passed: Received response from server")
+        print(f"Response: {curl_result[:100]}...")  # Show first 100 chars of response
+    else:
+        print("❌ Nginx test failed: No response from server")
+        print("Debugging info:")
+        print(client.cmd(f"curl -k -v https://{server.IP()}"))
+        net.stop()
+        sys.exit(1)
+
 def change_qdisc(host, intf, pkt_loss, delay):
     """Apply packet loss and delay using NetEm in Mininet."""
     command = (
@@ -48,8 +61,8 @@ def change_qdisc(host, intf, pkt_loss, delay):
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     
-    # command = f"sh ./s_timer.o {kex_alg} {measurements}"
-    command = f"sh ./test.sh"
+    command = f"sh ./s_timer.o {kex_alg} {measurements}"
+    # command = f"sh ./test.sh"
     print(f"[DEBUG] Client: {client}")
 
     result = client.cmd(command)
@@ -86,6 +99,13 @@ class ExperimentTopo(Topo):
         self.addLink(client, server, cls=TCLink)
 
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python experiment_mn.py <nginx_path> <nginx_conf_dir>")
+        sys.exit(1)
+
+    nginx_path = sys.argv[1]
+    nginx_conf_dir = sys.argv[2]
+
     # Create the network
     topo = ExperimentTopo()
     net = Mininet(topo=topo, link=TCLink)
@@ -100,6 +120,9 @@ if __name__ == "__main__":
     # Configure network interfaces
     client.cmd("tc qdisc add dev h1-eth0 root netem")
     server.cmd("tc qdisc add dev h2-eth0 root netem")
+
+    # Start nginx on server
+    server.cmd(f"sh {nginx_path} -c {nginx_conf_dir}")
 
     # Test connection
     test_connection(client, server)
