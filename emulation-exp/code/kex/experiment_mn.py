@@ -94,8 +94,8 @@ class ExperimentTopo(Topo):
     """Custom Mininet topology with one client and one server."""
     def build(self):
         # Add two hosts and a direct link
-        client = self.addHost("h1", ip="10.0.0.2")
-        server = self.addHost("h2", ip="10.0.0.1")
+        client = self.addHost("h2", ip="10.0.0.2")
+        server = self.addHost("h1", ip="10.0.0.1")
         self.addLink(client, server, cls=TCLink)
 
 if __name__ == "__main__":
@@ -114,15 +114,18 @@ if __name__ == "__main__":
     # subprocess.run(["ip", "netns", "list"])
 
     # Get client and server hosts
-    client = net.get("h1")
-    server = net.get("h2")
+    client = net.get("h2")
+    server = net.get("h1")
 
     # Configure network interfaces
-    client.cmd("tc qdisc add dev h1-eth0 root netem")
-    server.cmd("tc qdisc add dev h2-eth0 root netem")
+    client.cmd("tc qdisc add dev h2-eth0 root netem")
+    server.cmd("tc qdisc add dev h1-eth0 root netem")
+
+    server.cmd("ifconfig h1-eth0 10.0.0.1/24 up")
+    client.cmd("ifconfig h2-eth0 10.0.0.2/24 up")
 
     # Start nginx on server
-    server.cmd(f"sh {nginx_path} -c {nginx_conf_dir}")
+    server.cmd(f"{nginx_path} -c {nginx_conf_dir}")
 
     # Test connection
     test_connection(client, server)
