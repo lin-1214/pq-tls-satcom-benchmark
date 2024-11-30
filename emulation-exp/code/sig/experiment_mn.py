@@ -96,7 +96,7 @@ if __name__ == "__main__":
             csv_writer = csv.writer(out_file)
 
             # Test different packet loss rates
-            for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 13)):
+            for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 20)):
                 change_qdisc(client, "h2-eth0", pkt_loss, latency_ms)
                 change_qdisc(server, "h1-eth0", pkt_loss, latency_ms)
 
