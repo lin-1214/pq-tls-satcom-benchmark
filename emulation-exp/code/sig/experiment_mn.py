@@ -55,8 +55,8 @@ class ExperimentTopo(Topo):
         self.addLink(client, server, cls=TCLink)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python experiment_mn.py <nginx_path> <nginx_conf_dir>")
+    if len(sys.argv) != 4:
+        print("Usage: python3 experiment_mn.py <sig_alg> <nginx_path> <nginx_conf_dir>")
         sys.exit(1)
 
     sig_alg = sys.argv[1]
