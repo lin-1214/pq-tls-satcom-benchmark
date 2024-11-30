@@ -1,6 +1,8 @@
 #!/bin/bash
 # set -ex
 
+echo "Running key exchange experiment... ⚡"
+
 ROOT="$(dirname $(pwd))"
 
 NGINX_APP=${ROOT}/tmp/nginx/sbin/nginx

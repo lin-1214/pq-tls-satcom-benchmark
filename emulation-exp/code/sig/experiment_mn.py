@@ -7,8 +7,8 @@ from mininet.topo import Topo
 import os
 import sys
 
-MEASUREMENTS_PER_TIMER = 1
-TIMERS = 4
+MEASUREMENTS_PER_TIMER = 100     # 10
+TIMERS = 4                     # 4
 server, client = None, None
 
 def change_qdisc(host, intf, pkt_loss, delay):

@@ -1,6 +1,8 @@
 #!/bin/bash
 # set -x
 
+echo "Running signature experiment... ⚡"
+
 ROOT="$(dirname $(pwd))"
 
 NGINX_APP=${ROOT}/tmp/nginx/sbin/nginx
