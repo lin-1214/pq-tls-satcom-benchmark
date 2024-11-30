@@ -1,105 +1,109 @@
 import csv
 from multiprocessing import Pool
+from mininet.net import Mininet
+from mininet.node import Host
+from mininet.link import TCLink
+from mininet.topo import Topo
 import os
-import subprocess
 import sys
-
-# Our experiment used POOL_SIZE = 40
-POOL_SIZE = 4
 
 MEASUREMENTS_PER_TIMER = 1
 TIMERS = 4
+server, client = None, None
 
-def run_subprocess(command, working_dir='.', expected_returncode=0):
-    result = subprocess.run(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        cwd=working_dir
+def change_qdisc(host, intf, pkt_loss, delay):
+    """Apply packet loss and delay using NetEm in Mininet."""
+    command = (
+        f"tc qdisc change dev {intf} root netem "
+        f"limit 1000 delay {delay} rate 1000mbit"
     )
-    if(result.stderr):
-        print(result.stderr)
-    assert result.returncode == expected_returncode
-    return result.stdout.decode('utf-8')
-
-def change_qdisc(ns, dev, pkt_loss, delay):
-    if pkt_loss == 0:
-        command = [
-            'ip', 'netns', 'exec', ns,
-            'tc', 'qdisc', 'change',
-            'dev', dev, 'root', 'netem',
-            'limit', '1000',
-            'delay', delay,
-            'rate', '1000mbit'
-        ]
-    else:
-        command = [
-            'ip', 'netns', 'exec', ns,
-            'tc', 'qdisc', 'change',
-            'dev', dev, 'root', 'netem',
-            'limit', '1000',
-            'loss', '{0}%'.format(pkt_loss),
-            'delay', delay,
-            'rate', '1000mbit'
-        ]
-
-    print(" > " + " ".join(command))
-    run_subprocess(command)
+    if pkt_loss > 0:
+        command += f" loss {pkt_loss}%"
+    print(f"{host.name}: {command}")
+    host.cmd(command)
 
 def time_handshake(sig_alg, measurements):
-    command = [
-        'ip', 'netns', 'exec', 'cli_ns',
-         './s_timer.o', sig_alg, str(measurements)
-    ]
-    print(" > " + " ".join(command))
-    result = run_subprocess(command)
-    return [float(i) for i in result.strip().split(',')]
+    """Run handshake timing test from a Mininet host."""
+    command = f"./s_timer.o {sig_alg} {measurements}"
+    result = client.cmd(command)
+    return [float(i) for i in result.split(",")]
 
-def run_timers(sig_alg, timer_pool):
-    results_nested = timer_pool.starmap(time_handshake, [(sig_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-    return [item for sublist in results_nested for item in sublist]
+def run_timers(sig_alg):
+    """Run multiple timer measurements for a key exchange algorithm sequentially."""
+    results = []
+    for _ in range(TIMERS):
+        measurements = time_handshake(sig_alg, MEASUREMENTS_PER_TIMER)
+        results.extend(measurements)
+    return results
 
-def get_rtt_ms():
-    command = [
-        'ip', 'netns', 'exec', 'cli_ns',
-        'ping', '10.0.0.1', '-c', '30'
-    ]
+def get_rtt_ms(client, server):
+    """Ping the server from the client and extract RTT."""
+    result = client.cmd(f"ping {server.IP()} -c 30")
+    # print(f"[DEBUG] Ping result: {result}")
+    lines = result.splitlines()
+    rtt_line = [line for line in lines if "rtt" in line][0]
+    avg_rtt = rtt_line.split("/")[4]
+    return avg_rtt.replace(".", "p")
 
-    print(" > " + " ".join(command))
-    result = run_subprocess(command)
 
-    result_fmt = result.splitlines()[-1].split("/")
-    return result_fmt[4].replace(".", "p")
+class ExperimentTopo(Topo):
+    """Custom Mininet topology with one client and one server."""
+    def build(self):
+        # Add two hosts and a direct link
+        client = self.addHost("h2", ip="10.0.0.2")
+        server = self.addHost("h1", ip="10.0.0.1")
+        self.addLink(client, server, cls=TCLink)
 
-# Main
-timer_pool = Pool(processes=POOL_SIZE)
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: python experiment_mn.py <nginx_path> <nginx_conf_dir>")
+        sys.exit(1)
 
-if not os.path.exists('data'):
-    os.makedirs('data')
+    sig_alg = sys.argv[1]
+    nginx_path = sys.argv[2]
+    nginx_conf_dir = sys.argv[3]
 
-sig_alg = sys.argv[1]
+    # Create the network
+    topo = ExperimentTopo()
+    net = Mininet(topo=topo, link=TCLink)
+    net.start()
 
-for latency_ms in ['2.684ms', '15.458ms', '39.224ms', '97.73ms']:
-    # To get actual (emulated) RTT
-    change_qdisc('cli_ns', 'cli_ve', 0, delay=latency_ms)
-    change_qdisc('srv_ns', 'srv_ve', 0, delay=latency_ms)
-    rtt_str = get_rtt_ms()
+    # Get client and server hosts
+    client = net.get("h2")
+    server = net.get("h1")
 
-    with open('data/{}_{}ms.csv'.format(sig_alg, rtt_str),'w') as out:
-        csv_out=csv.writer(out)
-        for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3]:
-            change_qdisc('cli_ns', 'cli_ve', pkt_loss, delay=latency_ms)
-            change_qdisc('srv_ns', 'srv_ve', pkt_loss, delay=latency_ms)
-            result = run_timers(sig_alg, timer_pool)
-            result.insert(0, pkt_loss)
-            csv_out.writerow(result)
+    # Configure network interfaces
+    client.cmd("tc qdisc add dev h2-eth0 root netem")
+    server.cmd("tc qdisc add dev h1-eth0 root netem")
 
-        for pkt_loss in range(4, 21):
-            change_qdisc('cli_ns', 'cli_ve', pkt_loss, delay=latency_ms)
-            change_qdisc('srv_ns', 'srv_ve', pkt_loss, delay=latency_ms)
-            result = run_timers(sig_alg, timer_pool)
-            result.insert(0, pkt_loss)
-            csv_out.writerow(result)
+    # Start nginx on server
+    server.cmd(f"{nginx_path} -c {nginx_conf_dir}")
 
-timer_pool.close()
-timer_pool.join()
+    # Create data directory
+    if not os.path.exists("../../mn_data/sig"):
+        os.makedirs("../../mn_data/sig")
+
+    # Experiment loop
+    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
+        # Configure base delay
+        change_qdisc(client, "h2-eth0", 0, latency_ms)
+        change_qdisc(server, "h1-eth0", 0, latency_ms)
+        rtt_str = get_rtt_ms(client, server)
+        print(f"✅ RTT measurement success! RTT: {rtt_str}")
+
+        # Open CSV file for results
+        with open(f"../../mn_data/sig/{sig_alg}_{rtt_str}ms.csv", "w") as out_file:
+            csv_writer = csv.writer(out_file)
+
+            # Test different packet loss rates
+            for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 13)):
+                change_qdisc(client, "h2-eth0", pkt_loss, latency_ms)
+                change_qdisc(server, "h1-eth0", pkt_loss, latency_ms)
+
+                # Measure handshake times
+                results = run_timers(sig_alg)
+                results.insert(0, pkt_loss)
+                csv_writer.writerow(results)
+
+    # Cleanup
+    net.stop()

@@ -1,7 +1,43 @@
+# Compiled files
 *.o
 *.swp
 tags
 *.pem
+
+# Project specific directories
 emulation-exp/code/tmp/
 emulation-exp/code/kex/data
 emulation-exp/code/sig/data
+
+# Common system files
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-*
+.project
+.settings/
+
+# Build directories
+build/
+dist/
+out/
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Log files
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Backup files
+*~
+*.bak

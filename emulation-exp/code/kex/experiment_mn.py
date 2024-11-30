@@ -5,26 +5,13 @@ from mininet.node import Host
 from mininet.link import TCLink
 from mininet.topo import Topo
 import os
-import subprocess
 import sys
 
-# Experiment settings
-POOL_SIZE = 4
 MEASUREMENTS_PER_TIMER = 100
 TIMERS = 20
 
 client = None
 server = None
-
-def run_subprocess(command, expected_returncode=0):
-    """Run a shell command and return the output."""
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
-    )
-    if result.stderr:
-        print(result.stderr.decode('utf-8'))
-    assert result.returncode == expected_returncode
-    return result.stdout.decode('utf-8')
 
 def test_connection(client, server):
     """Test the connection between client and server using ping."""
@@ -104,8 +91,6 @@ if __name__ == "__main__":
     net = Mininet(topo=topo, link=TCLink)
     net.start()
 
-    # subprocess.run(["ip", "netns", "list"])
-
     # Get client and server hosts
     client = net.get("h2")
     server = net.get("h1")
@@ -113,9 +98,6 @@ if __name__ == "__main__":
     # Configure network interfaces
     client.cmd("tc qdisc add dev h2-eth0 root netem")
     server.cmd("tc qdisc add dev h1-eth0 root netem")
-
-    # server.cmd("ifconfig h1-eth0 10.0.0.1/24 up")
-    # client.cmd("ifconfig h2-eth0 10.0.0.2/24 up")
 
     # Start nginx on server
     server.cmd(f"{nginx_path} -c {nginx_conf_dir}")
@@ -147,7 +129,6 @@ if __name__ == "__main__":
 
                     # Measure handshake times
                     results = run_timers(kex_alg)
-                    # print(f"Results for {kex_alg} with {pkt_loss}% packet loss: {results}")
                     results.insert(0, pkt_loss)
                     csv_writer.writerow(results)
 
