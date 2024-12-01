@@ -51,14 +51,14 @@ def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
-    return [float(i) for i in result.split(",")]
+    return [float(i) for i in result.split(",") if i != ""]
 
 
 def run_timers(kex_alg):
     """Run multiple timer measurements for a key exchange algorithm in parallel."""
     with Pool(processes=POOL_SIZE) as timer_pool:
         results_nested = timer_pool.starmap(time_handshake, [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-        return [item for sublist in results_nested for item in sublist]
+        return [item for sublist in results_nested for item in sublist if sublist != []]
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
