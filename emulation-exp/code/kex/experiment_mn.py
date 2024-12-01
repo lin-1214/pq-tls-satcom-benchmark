@@ -8,7 +8,7 @@ import os
 import sys
 
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 20
+TIMERS = 50
 POOL_SIZE = 4
 
 client = None
@@ -53,7 +53,7 @@ def time_handshake(kex_alg, measurements):
     result = client.cmd(command)
     result = result.replace("\r", "")
     result = result.replace("\n", "")
-    
+
     return [float(i) for i in result.split(",") if i != ""]
 
 

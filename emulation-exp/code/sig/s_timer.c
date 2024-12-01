@@ -151,11 +151,12 @@ int main(int argc, char* argv[])
         measurements++;
     }
 
-    for(size_t i = 0; i < measurements - 1; i++)
+    for(size_t i = 0; i < measurements; i++)
     {
         printf("%f,", handshake_times_ms[i]);
     }
-    printf("%f", handshake_times_ms[measurements - 1]);
+    // printf("%f", handshake_times_ms[measurements - 1]);
+    printf("\n");
 
     ret = 0;
     goto end;
