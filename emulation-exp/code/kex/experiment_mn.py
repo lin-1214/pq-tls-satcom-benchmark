@@ -6,10 +6,10 @@ from mininet.link import TCLink
 from mininet.topo import Topo
 import os
 import sys
-from tqdm import tqdm
 
 MEASUREMENTS_PER_TIMER = 100
 TIMERS = 20
+POOL_SIZE = 4
 
 client = None
 server = None
@@ -55,12 +55,10 @@ def time_handshake(kex_alg, measurements):
 
 
 def run_timers(kex_alg):
-    """Run multiple timer measurements for a key exchange algorithm sequentially."""
-    results = []
-    for _ in tqdm(range(TIMERS), desc="Running timers"):
-        measurements = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
-        results.extend(measurements)
-    return results
+    """Run multiple timer measurements for a key exchange algorithm in parallel."""
+    with Pool(processes=POOL_SIZE) as timer_pool:
+        results_nested = timer_pool.starmap(time_handshake, [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
+        return [item for sublist in results_nested for item in sublist]
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
