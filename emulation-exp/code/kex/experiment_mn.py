@@ -51,7 +51,10 @@ def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
     command = f"./s_timer.o {kex_alg} {measurements}"
     result = client.cmd(command)
-    return [float(i) for i in result.split("[,\r\n]") if i != ""]
+    result = result.replace("\r", "")
+    result = result.replace("\n", "")
+    
+    return [float(i) for i in result.split(",") if i != ""]
 
 
 def run_timers(kex_alg):
