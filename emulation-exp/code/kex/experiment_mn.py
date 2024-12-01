@@ -112,7 +112,7 @@ if __name__ == "__main__":
         os.makedirs("../../mn_data/kex")
 
     # Experiment loop
-    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms", "299.4ms"]:
+    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
         # Configure base delay
         change_qdisc(client, "h2-eth0", 0, latency_ms)
         change_qdisc(server, "h1-eth0", 0, latency_ms)
