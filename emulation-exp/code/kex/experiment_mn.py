@@ -6,6 +6,7 @@ from mininet.link import TCLink
 from mininet.topo import Topo
 import os
 import sys
+from tqdm import tqdm
 
 MEASUREMENTS_PER_TIMER = 100
 TIMERS = 20
@@ -56,7 +57,7 @@ def time_handshake(kex_alg, measurements):
 def run_timers(kex_alg):
     """Run multiple timer measurements for a key exchange algorithm sequentially."""
     results = []
-    for _ in range(TIMERS):
+    for _ in tqdm(range(TIMERS), desc="Running timers"):
         measurements = time_handshake(kex_alg, MEASUREMENTS_PER_TIMER)
         results.extend(measurements)
     return results
@@ -110,7 +111,7 @@ if __name__ == "__main__":
         os.makedirs("../../mn_data/kex")
 
     # Experiment loop
-    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
+    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms", "299.4ms"]:
         # Configure base delay
         change_qdisc(client, "h2-eth0", 0, latency_ms)
         change_qdisc(server, "h1-eth0", 0, latency_ms)

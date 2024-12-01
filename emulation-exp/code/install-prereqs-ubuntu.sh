@@ -10,7 +10,10 @@ apt install -y git \
                ninja-build \
                libssl-dev \
                libpcre3-dev \
-               wget
+               wget \
+               python3-pip
+
+pip3 install tqdm
 
 NGINX_VERSION=1.17.5
 CMAKE_VERSION=3.18

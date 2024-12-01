@@ -154,6 +154,7 @@ int main(int argc, char* argv[])
         printf("%f,", handshake_times_ms[i]);
     }
     printf("%f", handshake_times_ms[measurements - 1]);
+    printf("\n");
 
     ret = 0;
     goto end;
