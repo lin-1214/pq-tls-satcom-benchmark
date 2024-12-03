@@ -4,12 +4,13 @@ from mininet.net import Mininet
 from mininet.node import Host
 from mininet.link import TCLink
 from mininet.topo import Topo
+from tqdm import tqdm
 import os
 import sys
 
 MEASUREMENTS_PER_TIMER = 100     # 10
-TIMERS = 50                    # 4
-POOL_SIZE = 4
+TIMERS = 10                    # 4
+# POOL_SIZE = 4
 server, client = None, None
 
 def change_qdisc(host, intf, pkt_loss, delay):
@@ -34,9 +35,10 @@ def time_handshake(sig_alg, measurements):
 
 def run_timers(sig_alg):
     """Run multiple timer measurements for a key exchange algorithm sequentially."""
-    with Pool(processes=POOL_SIZE) as timer_pool:
-        results_nested = timer_pool.starmap(time_handshake, [(sig_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-        return [item for sublist in results_nested for item in sublist if sublist != []]
+    results = []
+    for _ in tqdm(range(TIMERS), desc="Running timers"):
+        results.extend(time_handshake(sig_alg, MEASUREMENTS_PER_TIMER))
+    return results
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
@@ -98,7 +100,7 @@ if __name__ == "__main__":
             csv_writer = csv.writer(out_file)
 
             # Test different packet loss rates
-            for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 20)):
+            for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 13)):
                 change_qdisc(client, "h2-eth0", pkt_loss, latency_ms)
                 change_qdisc(server, "h1-eth0", pkt_loss, latency_ms)
 
