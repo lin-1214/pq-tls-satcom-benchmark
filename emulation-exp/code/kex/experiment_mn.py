@@ -6,10 +6,11 @@ from mininet.link import TCLink
 from mininet.topo import Topo
 import os
 import sys
+from tqdm import tqdm
 
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 50
-POOL_SIZE = 4
+TIMERS = 10
+# POOL_SIZE = 4
 
 client = None
 server = None
@@ -28,7 +29,6 @@ def test_connection(client, server):
     curl_result = client.cmd(f"curl -k https://{server.IP()}:4433")
     if curl_result:
         print("✅ Nginx test passed: Received response from server")
-        # print(f"Response: {curl_result[:200]}...")  # Show first 200 chars of response
     else:
         print("❌ Nginx test failed: No response from server")
         print("Debugging info:")
@@ -54,14 +54,17 @@ def time_handshake(kex_alg, measurements):
     result = result.replace("\r", "")
     result = result.replace("\n", "")
 
+    print(f"[DEBUG] Result: {result}")
+
     return [float(i) for i in result.split(",") if i != ""]
 
 
 def run_timers(kex_alg):
     """Run multiple timer measurements for a key exchange algorithm in parallel."""
-    with Pool(processes=POOL_SIZE) as timer_pool:
-        results_nested = timer_pool.starmap(time_handshake, [(kex_alg, MEASUREMENTS_PER_TIMER)] * TIMERS)
-        return [item for sublist in results_nested for item in sublist if sublist != []]
+    results = []
+    for _ in tqdm(range(TIMERS), desc="Running timers"):
+        results.extend(time_handshake(kex_alg, MEASUREMENTS_PER_TIMER))
+    return results
 
 def get_rtt_ms(client, server):
     """Ping the server from the client and extract RTT."""
