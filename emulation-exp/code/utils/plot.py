@@ -14,49 +14,88 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
     percentile_95_pq = handshake_time_pq.apply(lambda x: x.quantile(0.95), axis=1)
     percentile_95_trad = handshake_time_trad.apply(lambda x: x.quantile(0.95), axis=1)
 
+    # Calculate percentage differences
+    median_diff_percent = ((median_pq - median_trad) / median_trad) * 100
+    percentile_95_diff_percent = ((percentile_95_pq - percentile_95_trad) / percentile_95_trad) * 100
+
+    # Print results
+    print(f"\n=== Results for {type.upper()} - RTT: {label} ===")
+    print("Packet Loss % | Median Diff % | 95th Percentile Diff %")
+    print("-" * 50)
+    for i, loss in enumerate(pkt_loss):
+        print(f"{loss:11.1f} | {median_diff_percent[i]:11.1f} | {percentile_95_diff_percent[i]:20.1f}")
+
     # Create two subplots
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
 
     if type == 'kex':
-        # Plot medians in first subplot
-        ax1.plot(pkt_loss, median_pq, label=KEX_ALG[0], color='blue')
-        ax1.plot(pkt_loss, median_trad, label=KEX_ALG[1], color='red')
+        # Plot scatter points with lower alpha
+        for col in handshake_time_trad.columns:
+            ax1.scatter(pkt_loss, handshake_time_trad[col], alpha=0.05, color='red', s=10)
+        for col in handshake_time_pq.columns:
+            ax1.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
+            
+        # Plot medians with dashed line for traditional
+        ax1.plot(pkt_loss, median_trad, label=KEX_ALG[1], color='red', linewidth=2, linestyle='--', marker='o', markersize=8, fillstyle='none')
+        ax1.plot(pkt_loss, median_trad, color='red', marker='o', markersize=5)
+        ax1.plot(pkt_loss, median_pq, label=KEX_ALG[0], color='blue', linewidth=2, marker='o', markersize=8, fillstyle='none')
+        ax1.plot(pkt_loss, median_pq, color='blue', marker='o', markersize=5)
+        
         ax1.set_xlabel('Packet Loss (%)')
         ax1.set_ylabel('Handshake Time (ms)')
         ax1.set_title(f'Median Handshake Time vs Packet Loss - RTT: {label}')
         ax1.grid(True)
         ax1.legend(prop={'size': 12})
+        ax1.set_ylim(0, 10000)
         
-        # Plot 95th percentiles in second subplot
-        ax2.plot(pkt_loss, percentile_95_pq, label=KEX_ALG[0], color='blue')
-        ax2.plot(pkt_loss, percentile_95_trad, label=KEX_ALG[1], color='red')
-        ax2.set_xlabel('Packet Loss (%)')
-        ax2.set_ylabel('Handshake Time (ms)')
-        ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
-        ax2.grid(True)
-        ax2.legend(prop={'size': 12})
-        
-        plt.tight_layout()
-    
-    elif type == 'sig':
-        # Plot medians in first subplot
-        ax1.plot(pkt_loss, median_pq, label=SIG_ALG[0], color='blue')
-        ax1.plot(pkt_loss, median_trad, label=SIG_ALG[1], color='red')
-        ax1.set_xlabel('Packet Loss (%)')
-        ax1.set_ylabel('Handshake Time (ms)')
-        ax1.set_title(f'Median Handshake Time vs Packet Loss - RTT: {label}')
-        ax1.grid(True)
-        ax1.legend(prop={'size': 12})
-        
-        # Plot 95th percentiles in second subplot
-        ax2.plot(pkt_loss, percentile_95_pq, label=SIG_ALG[0], color='blue')
-        ax2.plot(pkt_loss, percentile_95_trad, label=SIG_ALG[1], color='red')
-        ax2.set_xlabel('Packet Loss (%)')
-        ax2.set_ylabel('Handshake Time (ms)')
-        ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
-        ax2.grid(True)
-        ax2.legend(prop={'size': 12})
+        # Do the same for 95th percentile plot
+        for col in handshake_time_trad.columns:
+            ax2.scatter(pkt_loss, handshake_time_trad[col], alpha=0.05, color='red', s=10)
+        for col in handshake_time_pq.columns:
+            ax2.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
+            
+        ax2.plot(pkt_loss, percentile_95_trad, label=KEX_ALG[1], color='red', linewidth=2, linestyle='--', marker='o', markersize=8)
+        ax2.plot(pkt_loss, percentile_95_trad, color='red', marker='o', markersize=5)
+        ax2.plot(pkt_loss, percentile_95_pq, label=KEX_ALG[0], color='blue', linewidth=2, marker='o', markersize=8)
+        ax2.plot(pkt_loss, percentile_95_pq, color='blue', marker='o', markersize=5)
 
+        ax2.set_xlabel('Packet Loss (%)')
+        ax2.set_ylabel('Handshake Time (ms)')
+        ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
+        ax2.grid(True)
+        ax2.legend(prop={'size': 12})
+        ax2.set_ylim(0, 10000)
+        
+    elif type == 'sig':
+        # Similar updates for signature plots
+        for col in handshake_time_pq.columns:
+            ax1.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
+        for col in handshake_time_trad.columns:
+            ax1.scatter(pkt_loss, handshake_time_trad[col], alpha=0.05, color='red', s=10)
+            
+        ax1.plot(pkt_loss, median_trad, label=SIG_ALG[1], color='red', linewidth=2, linestyle='--', marker='o', markersize=8, fillstyle='none')
+        ax1.plot(pkt_loss, median_trad, color='red', marker='o', markersize=5)
+        ax1.plot(pkt_loss, median_pq, label=SIG_ALG[0], color='blue', linewidth=2, marker='o', markersize=8, fillstyle='none')
+        ax1.plot(pkt_loss, median_pq, color='blue', marker='o', markersize=5)
+        
+        for col in handshake_time_pq.columns:
+            ax2.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
+        for col in handshake_time_trad.columns:
+            ax2.scatter(pkt_loss, handshake_time_trad[col], alpha=0.05, color='red', s=10)
+            
+        ax2.plot(pkt_loss, percentile_95_trad, label=SIG_ALG[1], color='red', linewidth=2, linestyle='--', marker='o', markersize=8)
+        ax2.plot(pkt_loss, percentile_95_trad, color='red', marker='o', markersize=5)
+        ax2.plot(pkt_loss, percentile_95_pq, label=SIG_ALG[0], color='blue', linewidth=2, marker='o', markersize=8)
+        ax2.plot(pkt_loss, percentile_95_pq, color='blue', marker='o', markersize=5)
+
+        ax2.set_xlabel('Packet Loss (%)')
+        ax2.set_ylabel('Handshake Time (ms)')
+        ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
+        ax2.grid(True)
+        ax2.legend(prop={'size': 12})
+        ax2.set_ylim(0, 10000)
+
+    plt.tight_layout()
     return plt
 
 def save_plot(plt, output_filename):
@@ -123,6 +162,7 @@ if __name__ == '__main__':
         
         # Separate packet loss and data columns
         packet_loss = df_ecdsa.iloc[:, 0] if len(df_dilithium.iloc[:, 0]) >= len(df_ecdsa.iloc[:, 0]) else df_dilithium.iloc[:, 0]
+        # packet_loss = df_prime.iloc[:, 0] if len(df_kyber.iloc[:, 0]) >= len(df_prime.iloc[:, 0]) else df_kyber.iloc[:, 0]
         handshake_time_dilithium = df_dilithium.iloc[: len(packet_loss), 1:]  # All other columns are data
         handshake_time_ecdsa = df_ecdsa.iloc[: len(packet_loss), 1:]  # All other columns are data
         
