@@ -16,14 +16,10 @@
 	- If your CPU does not satisfy requirement 3 above, you might have to either modify the build files in the [xvzcf/pq-tls-experiment branch](https://github.com/xvzcf/liboqs) yourself or change [this line](https://github.com/xvzcf/liboqs/blob/pq-tls-experiment/config/detect-cpu-extensions.c) to pull the most current liboqs from `https://github.com/open-quantum-safe/liboqs`
 
 
-2. To run the key-exchange experiments, navigate to `kex`, and run `./setup.sh` followed by `python3 experiment.py`. To cleanup, run `./teardown.sh`.
+2. To run the key-exchange experiments, navigate to `kex`, and run `sudo ./setup.sh` followed by `sudo ./runExp.sh`. To cleanup, run `sudo ./teardown.sh`.
 
-3. To run the signature experiments, navigate to `sig`, and run `./setup.sh` followed by `./run.sh`. To cleanup, run `./teardown.sh`.
+3. To run the signature experiments, navigate to `sig`, and run `sudo ./setup.sh` followed by `sudo ./runExp.sh`. To cleanup, run `sudo ./teardown.sh`.
 
 Make sure to cleanup before switching from the key-exchange experiments to the signature ones and vice-versa.
 
-========================================
 
-## Modifications
-
-1. Use Mininet to setup the network namespaces instead of the script `setup_ns.sh`.

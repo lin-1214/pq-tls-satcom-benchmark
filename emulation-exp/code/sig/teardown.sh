@@ -1,17 +1,13 @@
 #!/bin/bash
-set -x
-
-# Stop nginx in case we sent
-# SIGKILL to run.sh
-ip netns exec srv_ns ../tmp/nginx/sbin/nginx -s stop
+ROOT="$(dirname $(pwd))"
 
 ##########################
-# Remove s_timer
+# Stop Mininet
 ##########################
-rm s_timer.o
+sudo mn -c  # Clean up all Mininet instances
 
 ##########################
-# Remove network namespaces
+# Remove files
 ##########################
-ip netns del cli_ns
-ip netns del srv_ns
+rm -f prime256v1.pem \
+      s_timer.o

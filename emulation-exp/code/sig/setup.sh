@@ -13,11 +13,7 @@ NGINX_CONF_DIR=${ROOT}/tmp/nginx/conf
 ##########################
 make s_timer.o
 
-# ##########################
-# # Setup network namespaces
-# ##########################
-# ${ROOT}/setup_ns.sh
-
+# Setup Mininet
 ${ROOT}/setup_mn.sh
 
 ##########################
