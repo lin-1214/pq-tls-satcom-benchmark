@@ -94,7 +94,7 @@ if __name__ == "__main__":
         change_qdisc(server, "h1-eth0", 0, latency_ms)
         rtt_str = get_rtt_ms(client, server)
         print(f"✅ RTT measurement success! RTT: {rtt_str}")
-
+        
         # Open CSV file for results
         with open(f"../../mn_data/sig/{sig_alg}_{rtt_str}ms.csv", "w") as out_file:
             csv_writer = csv.writer(out_file)
