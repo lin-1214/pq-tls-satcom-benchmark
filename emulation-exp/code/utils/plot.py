@@ -77,6 +77,13 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
         ax1.plot(pkt_loss, median_trad, color='red', marker='o', markersize=5)
         ax1.plot(pkt_loss, median_pq, label=SIG_ALG[0], color='blue', linewidth=2, marker='o', markersize=8, fillstyle='none')
         ax1.plot(pkt_loss, median_pq, color='blue', marker='o', markersize=5)
+
+        ax1.set_xlabel('Packet Loss (%)')
+        ax1.set_ylabel('Handshake Time (ms)')
+        ax1.set_title(f'Median Handshake Time vs Packet Loss - RTT: {label}')
+        ax1.grid(True)
+        ax1.legend(prop={'size': 12})
+        ax1.set_ylim(0, 10000)
         
         for col in handshake_time_pq.columns:
             ax2.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
@@ -115,8 +122,8 @@ def save_plot(plt, output_filename):
 
 
 KEX_RTT = ['6p164ms', '31p749ms', '79p188ms', '196p425ms', '596p551ms'] # ms
-SIG_RTT_D = ['6p306ms', '31p844ms', '79p216ms', '196p489ms'] # ms
-SIG_RTT_E = ['6p282ms', '31p702ms', '79p217ms', '196p182ms']
+SIG_RTT_D = ['6p306ms', '31p844ms', '79p216ms', '196p489ms', '616p549ms'] # ms
+SIG_RTT_E = ['6p282ms', '31p702ms', '79p217ms', '196p182ms', '616p504ms']
 
 DATA_FILE = '../../mn_data'
 
