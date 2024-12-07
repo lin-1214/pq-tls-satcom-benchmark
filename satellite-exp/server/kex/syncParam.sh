@@ -12,12 +12,12 @@ fi
 CLIENT_IP=$1
 
 # copy CA key and cert with error handling
-scp ${ROOT}/kex/prime256v1.pem client@${CLIENT_IP}:${CLIENT_DIR} || {
+scp "${ROOT}/kex/prime256v1.pem" "client@${CLIENT_IP}:${CLIENT_DIR}" || {
     echo "Error: Failed to copy prime256v1.pem"
     exit 1
 }
 
-scp ${ROOT}/tmp/nginx/conf/CA.crt client@${CLIENT_IP}:${CLIENT_DIR} || {
+scp "${ROOT}/tmp/nginx/conf/CA.crt" "client@${CLIENT_IP}:${CLIENT_DIR}" || {
     echo "Error: Failed to copy CA.crt"
     exit 1
 }
