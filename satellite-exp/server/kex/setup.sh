@@ -28,3 +28,6 @@ ${OPENSSL} x509 -req -in ${NGINX_CONF_DIR}/server.csr -out ${NGINX_CONF_DIR}/ser
 # Start nginx
 ##########################
 cp nginx.conf ${NGINX_CONF_DIR}/nginx.conf
+
+echo "[+]Execute syncParam.sh to sync CA key and cert to client"
+echo "[+]Usage: ./syncParam.sh <client_ip>"
