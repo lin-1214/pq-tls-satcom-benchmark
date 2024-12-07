@@ -13,6 +13,10 @@ NGINX_CONF_DIR=${ROOT}/tmp/nginx/conf
 # Generate ECDSA P-256 cert
 ##########################
 # generate curve parameters
+${OPENSSL} ecparam -out prime256v1.pem -name prime256v1
+
+# generate CA key and cert
+${OPENSSL} req -x509 -new -newkey ec:prime256v1.pem -keyout ${NGINX_CONF_DIR}/CA.key -out ${NGINX_CONF_DIR}/CA.crt -nodes -subj "/CN=OQS test ecdsap256 CA" -days 365 -config ${OPENSSL_CNF}
 
 # generate server CSR
 ${OPENSSL} req -new -newkey ec:prime256v1.pem -keyout ${NGINX_CONF_DIR}/server.key -out ${NGINX_CONF_DIR}/server.csr -nodes -subj "/CN=oqstest CA ecdsap256" -config ${OPENSSL_CNF}
