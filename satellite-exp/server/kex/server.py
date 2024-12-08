@@ -81,6 +81,13 @@ def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
         print(f"Error updating qdisc: {e}")
         sys.exit(1)
 
+def stop_nginx():
+    """Stop any running nginx processes."""
+    try:
+        run_subprocess(['pkill', 'nginx'], expected_returncode=None)
+        print("Stopped existing nginx processes")
+    except AssertionError:
+        print("No existing nginx processes found")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -89,6 +96,9 @@ if __name__ == "__main__":
 
     nginx_path = sys.argv[1]
     nginx_conf_dir = sys.argv[2]
+
+    # Stop any existing nginx processes
+    stop_nginx()
 
     # Configure network before starting nginx
     configure_network_interface()
