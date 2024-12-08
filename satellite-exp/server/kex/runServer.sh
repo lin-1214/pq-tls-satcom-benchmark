@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -ex
 
-echo "Running key exchange experiment... ⚡"
+echo "Running key exchange experiment on server... ⚡"
 
 ROOT="$(dirname $(pwd))"
 

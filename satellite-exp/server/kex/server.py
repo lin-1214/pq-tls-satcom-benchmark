@@ -7,7 +7,7 @@ import subprocess
 SERVER_IP = "192.168.50.55"
 NETMASK = "24"
 INTERFACE = "eth0"
-BASE_DELAY = "15.458ms"  # Can be adjusted based on experiment needs
+BASE_LATENCY = "15.458ms"
 RATE = "1000mbit"
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
@@ -65,11 +65,11 @@ def configure_network_interface():
             print(f"Error executing command: {' '.join(cmd)}")
             sys.exit(1)
 
-def change_qdisc(pkt_loss=0, delay=BASE_DELAY):
+def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
     """Update qdisc parameters (matching experiment_mn.py function)."""
     command = [
         'tc', 'qdisc', 'change', 'dev', INTERFACE, 'root', 'netem',
-        'limit', '1000', 'delay', delay, 'rate', RATE
+        'limit', '1000', 'delay', latency, 'rate', RATE
     ]
     if pkt_loss > 0:
         command.extend(['loss', f'{pkt_loss}%'])
@@ -96,3 +96,8 @@ if __name__ == "__main__":
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])
     print("[+]Nginx started")
+
+    # Change qdisc to initial state
+    change_qdisc()
+
+    
