@@ -10,6 +10,7 @@ CLIENT_IP = "192.168.50.54"  # Corrected client IP
 NETMASK = "24"
 INTERFACE = "eth0"
 RATE = "1000mbit"
+BASE_LATENCY = "15.458ms"
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(
@@ -73,9 +74,28 @@ def get_rtt_ms():
     avg_rtt = rtt_line.split("/")[4]
     return avg_rtt.replace(".", "p")
 
+def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
+    """Update qdisc parameters (matching experiment_mn.py function)."""
+    command = [
+        'tc', 'qdisc', 'change', 'dev', INTERFACE, 'root', 'netem',
+        'limit', '1000', 'delay', latency, 'rate', RATE
+    ]
+    if pkt_loss > 0:
+        command.extend(['loss', f'{pkt_loss}%'])
+    
+    try:
+        run_subprocess(command)
+        print(f"Successfully updated qdisc: {' '.join(command)}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error updating qdisc: {e}")
+        sys.exit(1)
+
 if __name__ == "__main__":
     # Configure network interface first
     configure_network_interface()
+    
+    # Change qdisc to initial state
+    change_qdisc()
     
     # Measure RTT
     rtt_str = get_rtt_ms()
