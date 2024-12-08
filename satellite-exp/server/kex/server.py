@@ -3,6 +3,13 @@ import os
 import sys
 import subprocess
 
+# Network configuration constants
+SERVER_IP = "192.168.50.55"
+NETMASK = "24"
+INTERFACE = "eth0"
+BASE_DELAY = "15.458ms"  # Can be adjusted based on experiment needs
+RATE = "1000mbit"
+
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(
         command,
@@ -15,40 +22,46 @@ def run_subprocess(command, working_dir='.', expected_returncode=0):
     assert result.returncode == expected_returncode
     return result.stdout.decode('utf-8')
 
-# Network configuration constants
-SERVER_IP = "192.168.50.55"
-NETMASK = "24"
-INTERFACE = "eth0"
-BASE_DELAY = "15.458ms"  # Can be adjusted based on experiment needs
-RATE = "1000mbit"
+def reset_interface():
+    """Reset the network interface to a clean state."""
+    reset_commands = [
+        ['ip', 'link', 'set', INTERFACE, 'down'],
+        ['ip', 'addr', 'flush', 'dev', INTERFACE],
+        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
+    ]
+    
+    for cmd in reset_commands:
+        try:
+            if cmd[2] == 'del':
+                run_subprocess(cmd, expected_returncode=2)  # tc returns 2 when no qdisc exists
+            else:
+                run_subprocess(cmd)
+            print(f"Reset step completed: {' '.join(cmd)}")
+        except AssertionError:
+            if cmd[2] == 'del':
+                continue
+            print(f"Warning during reset: {' '.join(cmd)}")
 
 def configure_network_interface():
     """Configure the server network interface with tc qdisc."""
+    # First reset the interface
+    reset_interface()
+    
     commands = [
         # Basic interface configuration
         ['ip', 'link', 'set', INTERFACE, 'up'],
-        ['ip', 'addr', 'flush', 'dev', INTERFACE],
         ['ip', 'addr', 'add', f'{SERVER_IP}/{NETMASK}', 'dev', INTERFACE],
-        
-        # Remove existing qdisc if any
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
-        
         # Add traffic control qdisc (matching experiment_mn.py approach)
         ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],
     ]
     
     for cmd in commands:
         try:
-            # Allow the qdisc delete command to fail if no qdisc exists
-            expected_returncode = 0
-            if cmd[2] == 'del':
-                expected_returncode = None  # Accept any return code for delete
-            run_subprocess(cmd, expected_returncode=expected_returncode)
+            run_subprocess(cmd)
             print(f"Successfully executed: {' '.join(cmd)}")
-        except subprocess.CalledProcessError as e:
-            if cmd[2] != 'del':  # Only exit if non-delete command fails
-                print(f"Error configuring network: {e}")
-                sys.exit(1)
+        except AssertionError:
+            print(f"Error executing command: {' '.join(cmd)}")
+            sys.exit(1)
 
 def change_qdisc(pkt_loss=0, delay=BASE_DELAY):
     """Update qdisc parameters (matching experiment_mn.py function)."""
