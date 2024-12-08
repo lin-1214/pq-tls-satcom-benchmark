@@ -16,7 +16,7 @@
 #define NS_IN_MS 1000000.0
 #define MS_IN_S 1000
 
-const char* host = "10.0.0.1:4433";
+const char* host = "192.168.50.55:4433";
 
 SSL* do_tls_handshake(SSL_CTX* ssl_ctx)
 {

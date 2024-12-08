@@ -27,7 +27,7 @@ def reset_interface():
     reset_commands = [
         ['ip', 'link', 'set', INTERFACE, 'down'],
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root', 'handle', '1:'],
+        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
     ]
     
     for cmd in reset_commands:
@@ -100,4 +100,4 @@ if __name__ == "__main__":
     # Change qdisc to initial state
     change_qdisc()
 
-    
+

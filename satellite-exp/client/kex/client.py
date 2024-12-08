@@ -29,14 +29,14 @@ def reset_interface():
     reset_commands = [
         ['ip', 'link', 'set', INTERFACE, 'down'],
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root', 'handle', '1:'],
+        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],  # Just delete root qdisc
     ]
     
     for cmd in reset_commands:
         try:
             if 'qdisc' in cmd:
                 try:
-                    run_subprocess(cmd, expected_returncode=0)
+                    run_subprocess(cmd, expected_returncode=2)  # Allow error code 2 for non-existent qdisc
                 except AssertionError:
                     print(f"No existing qdisc to delete on {INTERFACE}")
             else:
@@ -55,7 +55,7 @@ def configure_network_interface():
         ['ip', 'link', 'set', INTERFACE, 'up'],
         ['ip', 'addr', 'add', f'{CLIENT_IP}/{NETMASK}', 'dev', INTERFACE],
         # Add traffic control qdisc
-        ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],
+        ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],  # Simplified command
     ]
     
     for cmd in commands:
