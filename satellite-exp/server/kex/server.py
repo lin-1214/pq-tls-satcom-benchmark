@@ -30,21 +30,25 @@ def configure_network_interface():
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
         ['ip', 'addr', 'add', f'{SERVER_IP}/{NETMASK}', 'dev', INTERFACE],
         
+        # Remove existing qdisc if any
+        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
+        
         # Add traffic control qdisc (matching experiment_mn.py approach)
         ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],
-        
-        # Set initial network conditions
-        ['tc', 'qdisc', 'change', 'dev', INTERFACE, 'root', 'netem',
-         'limit', '1000', 'delay', BASE_DELAY, 'rate', RATE]
     ]
     
     for cmd in commands:
         try:
-            run_subprocess(cmd)
+            # Allow the qdisc delete command to fail if no qdisc exists
+            expected_returncode = 0
+            if cmd[2] == 'del':
+                expected_returncode = None  # Accept any return code for delete
+            run_subprocess(cmd, expected_returncode=expected_returncode)
             print(f"Successfully executed: {' '.join(cmd)}")
         except subprocess.CalledProcessError as e:
-            print(f"Error configuring network: {e}")
-            sys.exit(1)
+            if cmd[2] != 'del':  # Only exit if non-delete command fails
+                print(f"Error configuring network: {e}")
+                sys.exit(1)
 
 def change_qdisc(pkt_loss=0, delay=BASE_DELAY):
     """Update qdisc parameters (matching experiment_mn.py function)."""
