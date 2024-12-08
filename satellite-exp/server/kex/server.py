@@ -27,19 +27,21 @@ def reset_interface():
     reset_commands = [
         ['ip', 'link', 'set', INTERFACE, 'down'],
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
+        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root', 'handle', '1:'],
     ]
     
     for cmd in reset_commands:
         try:
-            if cmd[2] == 'del':
-                run_subprocess(cmd, expected_returncode=2)  # tc returns 2 when no qdisc exists
+            if 'qdisc' in cmd:
+                # Ignore errors for tc qdisc del command
+                try:
+                    run_subprocess(cmd, expected_returncode=0)
+                except AssertionError:
+                    print(f"No existing qdisc to delete on {INTERFACE}")
             else:
                 run_subprocess(cmd)
             print(f"Reset step completed: {' '.join(cmd)}")
         except AssertionError:
-            if cmd[2] == 'del':
-                continue
             print(f"Warning during reset: {' '.join(cmd)}")
 
 def configure_network_interface():
