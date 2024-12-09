@@ -3,9 +3,15 @@ import os
 import sys
 import subprocess
 import socket
-
+import json
 # Network configuration constants
-SERVER_IP = "192.168.50.55"
+SERVER_IP = None
+
+# Read network configuration from config file
+with open('../config.json') as f:
+    config = json.load(f)
+    SERVER_IP = config['server_ip']
+
 NETMASK = "24"
 INTERFACE = "eth0"
 SERVER_PORT = 8000
