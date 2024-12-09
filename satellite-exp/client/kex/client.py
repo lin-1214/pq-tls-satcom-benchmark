@@ -87,7 +87,7 @@ def send_completion_message():
 
 def time_handshake(kex_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    result = run_subprocess(["./s_timer.o", kex_alg, measurements])
+    result = run_subprocess(["./s_timer.o", kex_alg, str(measurements)])
     result = result.replace("\r", "")
     result = result.replace("\n", "")
 

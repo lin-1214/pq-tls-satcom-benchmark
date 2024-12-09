@@ -73,15 +73,18 @@ def stop_nginx():
     except AssertionError:
         print("No existing nginx processes found")
 
-def listen_for_client_completion():
+def listen_for_client_completion(message_count=2):
+    """Listen for multiple completion messages from client"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
         server_socket.bind((SERVER_IP, SERVER_PORT))
         server_socket.listen()
-        conn, addr = server_socket.accept()
-        with conn:
-            data = conn.recv(1024)
-            if data == b"CLIENT_FINISHED":
-                print("Client has finished!")
+        
+        for i in range(message_count):
+            conn, addr = server_socket.accept()
+            with conn:
+                data = conn.recv(1024)
+                if data == b"CLIENT_FINISHED":
+                    print(f"Client has finished message {i+1}!")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
@@ -100,11 +103,8 @@ if __name__ == "__main__":
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])
 
-    # Listen until client test RTT done
-    listen_for_client_completion()
-
-    # Listen until client test handshake done
-    listen_for_client_completion()
+    # Listen for both completion messages with a single socket
+    listen_for_client_completion(2)
 
     
 
