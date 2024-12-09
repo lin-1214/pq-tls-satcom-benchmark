@@ -8,7 +8,7 @@ ROOT="$(dirname $(pwd))"
 for SIG in "ecdsap256" "dilithium2";
 do
     # Run experiment
-    sudo python3 experiment_mn.py ${SIG}
+    sudo python3 ${ROOT}/sig/client.py ${SIG}
 
     # Wait a bit longer then server
     sleep 10

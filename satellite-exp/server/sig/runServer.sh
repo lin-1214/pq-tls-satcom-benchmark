@@ -14,7 +14,7 @@ do
     sed "s/??SERVER_CERT??/${SIG}_server.crt/g; s/??SERVER_KEY??/${SIG}_server.key/g" nginx.conf > ${NGINX_CONF_DIR}/nginx.conf
 
     # Run experiment
-    python3 experiment_mn.py ${SIG} ${NGINX_APP} ${NGINX_CONF_DIR}/nginx.conf
+    sudo python3 ${ROOT}/sig/server.py ${NGINX_APP} ${NGINX_CONF_DIR}/nginx.conf
 
     # Wait a bit before restarting
     sleep 5
