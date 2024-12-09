@@ -1,11 +1,14 @@
 ROOT=$(shell dirname $(shell pwd))
 OPENSSL_DIR=$(ROOT)/tmp/openssl
 
-OPENSSL_INCLUDE=$(OPENSSL_DIR)/include
-OPENSSL=$(OPENSSL_DIR)/apps/openssl
-
+# Define OQS paths first
 OQS_INCLUDE=$(OPENSSL_DIR)/oqs/include
 OQS_LIB=$(OPENSSL_DIR)/oqs/lib
 
+# Then use them in flags
+CFLAGS=-g -Wall -Wextra -Werror -Wpedantic -I$(OPENSSL_DIR)/include -I$(OQS_INCLUDE)
+LDFLAGS=-Wl,-rpath,$(OPENSSL_DIR) -L$(OPENSSL_DIR) -L$(OQS_LIB)
+LIBS=-lssl -lcrypto -ldl -lpthread -loqs
+
 s_timer.o: s_timer.c
-	$(CC) -g -Wall -Wextra -Werror -Wpedantic -I$(OPENSSL_INCLUDE) -I$(OQS_INCLUDE) $< -L$(OPENSSL_DIR) -L$(OQS_LIB) -lssl -lcrypto -ldl -lpthread -loqs -o $@
+	$(CC) $(CFLAGS) $< $(LDFLAGS) $(LIBS) -o $@
