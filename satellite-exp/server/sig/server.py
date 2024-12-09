@@ -52,7 +52,6 @@ def configure_network_interface():
         # Basic interface configuration only
         ['ip', 'link', 'set', INTERFACE, 'up'],
         ['ip', 'addr', 'add', f'{SERVER_IP}/{NETMASK}', 'dev', INTERFACE],
-        # Removed the tc qdisc configuration
     ]
     
     for cmd in commands:
@@ -83,6 +82,8 @@ def listen_for_client_completion(message_count=2):
                 data = conn.recv(1024)
                 if data == b"CLIENT_FINISHED":
                     print(f"Client has finished message {i+1}!")
+
+    server_socket.close()
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:

@@ -24,10 +24,6 @@ ${OPENSSL} req -new -newkey ec:prime256v1.pem -keyout ${NGINX_CONF_DIR}/server.k
 # generate server cert
 ${OPENSSL} x509 -req -in ${NGINX_CONF_DIR}/server.csr -out ${NGINX_CONF_DIR}/server.crt -CA ${NGINX_CONF_DIR}/CA.crt -CAkey ${NGINX_CONF_DIR}/CA.key -CAcreateserial -days 365
 
-##########################
-# Start nginx
-##########################
-cp nginx.conf ${NGINX_CONF_DIR}/nginx.conf
 
 chmod 755 ./syncParam.sh
 chmod 755 ./runServer.sh
