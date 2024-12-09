@@ -29,7 +29,6 @@ def reset_interface():
     reset_commands = [
         ['ip', 'link', 'set', INTERFACE, 'down'],
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],
     ]
     
     for cmd in reset_commands:
@@ -101,10 +100,11 @@ if __name__ == "__main__":
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])
 
-    # Listen until client is done
+    # Listen until client test RTT done
     listen_for_client_completion()
 
-
+    # Listen until client test handshake done
+    listen_for_client_completion()
 
     
 

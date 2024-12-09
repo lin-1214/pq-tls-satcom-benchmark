@@ -10,9 +10,9 @@ SERVER_IP = "192.168.50.55"
 CLIENT_IP = "192.168.50.54" 
 NETMASK = "24"
 INTERFACE = "eth0"
-RATE = "1000mbit"
-BASE_LATENCY = "15.458ms"
 SERVER_PORT = 8000  
+MEASUREMENTS_PER_TIMER = 100
+TIMERS = 50
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(
@@ -31,7 +31,6 @@ def reset_interface():
     reset_commands = [
         ['ip', 'link', 'set', INTERFACE, 'down'],
         ['ip', 'addr', 'flush', 'dev', INTERFACE],
-        ['tc', 'qdisc', 'del', 'dev', INTERFACE, 'root'],  # Just delete root qdisc
     ]
     
     for cmd in reset_commands:
@@ -86,6 +85,24 @@ def send_completion_message():
     except Exception as e:
         print(f"❌ Error sending completion message: {e}")
 
+def time_handshake(kex_alg, measurements):
+    """Run handshake timing test from a Mininet host."""
+    result = run_subprocess(["./s_timer.o", kex_alg, measurements])
+    result = result.replace("\r", "")
+    result = result.replace("\n", "")
+
+    print(f"[DEBUG] Result: {result}")
+
+    return [float(i) for i in result.split(",") if i != ""]
+
+
+def run_timers(kex_alg):
+    """Run multiple timer measurements for a key exchange algorithm in parallel."""
+    results = []
+    for _ in tqdm(range(TIMERS), desc="Running timers"):
+        results.extend(time_handshake(kex_alg, MEASUREMENTS_PER_TIMER))
+    return results
+
 if __name__ == "__main__":
     # Configure network interface first
     configure_network_interface()
@@ -96,4 +113,16 @@ if __name__ == "__main__":
     
     # Send completion message
     send_completion_message()
-    
+
+    # Create data directory
+    if not os.path.exists("../../sat_data/kex"):
+        os.makedirs("../../sat_data/kex")
+
+    for kex_alg in ["prime256v1", "p256_kyber512_90s"]:
+        results = run_timers(kex_alg)
+        with open(f"../../sat_data/kex/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
+            csv_writer = csv.writer(out_file)
+            csv_writer.writerow(results)
+
+    # Send completion message
+    send_completion_message()
