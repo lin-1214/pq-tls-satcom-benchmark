@@ -24,3 +24,8 @@ This repository contains tools and experiments for measuring how post-quantum cr
 - Satellite link simulator
 
 ### Installation
+
+
+## References
+
+- [PQC-TLS-Benchmark](https://github.com/xvzcf/pq-tls-benchmark)
