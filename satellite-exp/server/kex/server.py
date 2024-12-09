@@ -2,6 +2,7 @@ import csv
 import os
 import sys
 import subprocess
+import socket
 
 # Network configuration constants
 SERVER_IP = "192.168.50.55"
@@ -9,6 +10,7 @@ NETMASK = "24"
 INTERFACE = "eth0"
 BASE_LATENCY = "15.458ms"
 RATE = "1000mbit"
+SERVER_PORT = 8000
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(
@@ -89,6 +91,16 @@ def stop_nginx():
     except AssertionError:
         print("No existing nginx processes found")
 
+def listen_for_client_completion():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.bind((SERVER_IP, SERVER_PORT))
+        server_socket.listen()
+        conn, addr = server_socket.accept()
+        with conn:
+            data = conn.recv(1024)
+            if data == b"CLIENT_FINISHED":
+                print("Client has finished!")
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python server.py <nginx_path> <nginx_conf_dir>")
@@ -105,9 +117,15 @@ if __name__ == "__main__":
 
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])
-    print("[+]Nginx started")
 
     # Change qdisc to initial state
     change_qdisc()
+
+    # Listen until client is done
+    listen_for_client_completion()
+
+    
+
+    
 
 

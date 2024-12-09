@@ -3,14 +3,16 @@ import os
 import sys
 from tqdm import tqdm
 import subprocess
+import socket
 
 # Network configuration constants
 SERVER_IP = "192.168.50.55"
-CLIENT_IP = "192.168.50.54"  # Corrected client IP
+CLIENT_IP = "192.168.50.54" 
 NETMASK = "24"
 INTERFACE = "eth0"
 RATE = "1000mbit"
 BASE_LATENCY = "15.458ms"
+SERVER_PORT = 8000  
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(
@@ -90,6 +92,18 @@ def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
         print(f"Error updating qdisc: {e}")
         sys.exit(1)
 
+def send_completion_message():
+    """Send a completion message to the server."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((SERVER_IP, SERVER_PORT))
+            sock.sendall(b"CLIENT_FINISHED")
+            print("✅ Completion message sent to server")
+    except ConnectionRefusedError:
+        print("❌ Could not connect to server - is it running?")
+    except Exception as e:
+        print(f"❌ Error sending completion message: {e}")
+
 if __name__ == "__main__":
     # Configure network interface first
     configure_network_interface()
@@ -100,4 +114,7 @@ if __name__ == "__main__":
     # Measure RTT
     rtt_str = get_rtt_ms()
     print(f"✅ RTT measurement success! RTT: {rtt_str}")
+    
+    # Send completion message
+    send_completion_message()
     
