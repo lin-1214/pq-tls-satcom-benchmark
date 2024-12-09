@@ -16,6 +16,7 @@ apt install -y git \
 
 pip3 install tqdm
 
+NGINX_VERSION=1.17.5
 CMAKE_VERSION=3.18
 CMAKE_BUILD=3
 
