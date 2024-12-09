@@ -91,8 +91,6 @@ def time_handshake(kex_alg, measurements):
     result = result.replace("\r", "")
     result = result.replace("\n", "")
 
-    print(f"[DEBUG] Result: {result}")
-
     return [float(i) for i in result.split(",") if i != ""]
 
 
