@@ -1,5 +1,26 @@
-This repository is a companion to the following paper:
+# PQC-TLS Satellite Performance Testing
 
-- Christian Paquin, Douglas Stebila, and Goutam Tamvada. **Benchmarking post-quantum cryptography in TLS**. *IACR Cryptology ePrint Archive*, Report 2019/1447. [https://eprint.iacr.org/2019/1447](https://eprint.iacr.org/2019/1447).
+A research project to evaluate the performance impact of post-quantum cryptography (PQC) algorithms on TLS handshake times in satellite network environments.
 
-It contains code and associated data for benchmarking post-quantum cryptography in TLS 1.3. The `emulation_exp` and `internet_exp` folders contain code and data related to the emulated and internet experiments, respectively.
+## Overview
+
+This repository contains tools and experiments for measuring how post-quantum cryptographic algorithms affect TLS handshake latency when operating over satellite links. The research focuses on understanding the practical implications of implementing quantum-resistant security in high-latency satellite communications.
+
+## Features
+
+- TLS handshake timing measurements for various PQC algorithms
+- Satellite network condition simulation
+- Comparison between classical and post-quantum TLS performance
+- Support for multiple NIST PQC candidates
+- Network latency and bandwidth analysis tools
+
+## Environment Setup
+
+### Prerequisites
+
+- OpenSSL with PQC support
+- Network emulation tools (e.g., tc, netem)
+- Python 3.8+
+- Satellite link simulator
+
+### Installation
