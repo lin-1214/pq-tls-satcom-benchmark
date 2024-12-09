@@ -56,8 +56,6 @@ def configure_network_interface():
         # Basic interface configuration
         ['ip', 'link', 'set', INTERFACE, 'up'],
         ['ip', 'addr', 'add', f'{CLIENT_IP}/{NETMASK}', 'dev', INTERFACE],
-        # Add traffic control qdisc
-        ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],  # Simplified command
     ]
     
     for cmd in commands:
@@ -76,22 +74,6 @@ def get_rtt_ms():
     avg_rtt = rtt_line.split("/")[4]
     return avg_rtt.replace(".", "p")
 
-def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
-    """Update qdisc parameters (matching experiment_mn.py function)."""
-    command = [
-        'tc', 'qdisc', 'change', 'dev', INTERFACE, 'root', 'netem',
-        'limit', '1000', 'delay', latency, 'rate', RATE
-    ]
-    if pkt_loss > 0:
-        command.extend(['loss', f'{pkt_loss}%'])
-    
-    try:
-        run_subprocess(command)
-        print(f"Successfully updated qdisc: {' '.join(command)}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error updating qdisc: {e}")
-        sys.exit(1)
-
 def send_completion_message():
     """Send a completion message to the server."""
     try:
@@ -107,9 +89,6 @@ def send_completion_message():
 if __name__ == "__main__":
     # Configure network interface first
     configure_network_interface()
-    
-    # Change qdisc to initial state
-    change_qdisc()
     
     # Measure RTT
     rtt_str = get_rtt_ms()

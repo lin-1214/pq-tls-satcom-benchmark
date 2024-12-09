@@ -47,16 +47,15 @@ def reset_interface():
             print(f"Warning during reset: {' '.join(cmd)}")
 
 def configure_network_interface():
-    """Configure the server network interface with tc qdisc."""
+    """Configure the server network interface without tc qdisc."""
     # First reset the interface
     reset_interface()
     
     commands = [
-        # Basic interface configuration
+        # Basic interface configuration only
         ['ip', 'link', 'set', INTERFACE, 'up'],
         ['ip', 'addr', 'add', f'{SERVER_IP}/{NETMASK}', 'dev', INTERFACE],
-        # Add traffic control qdisc (matching experiment_mn.py approach)
-        ['tc', 'qdisc', 'add', 'dev', INTERFACE, 'root', 'netem'],
+        # Removed the tc qdisc configuration
     ]
     
     for cmd in commands:
@@ -66,22 +65,6 @@ def configure_network_interface():
         except AssertionError:
             print(f"Error executing command: {' '.join(cmd)}")
             sys.exit(1)
-
-def change_qdisc(pkt_loss=0, latency=BASE_LATENCY):
-    """Update qdisc parameters (matching experiment_mn.py function)."""
-    command = [
-        'tc', 'qdisc', 'change', 'dev', INTERFACE, 'root', 'netem',
-        'limit', '1000', 'delay', latency, 'rate', RATE
-    ]
-    if pkt_loss > 0:
-        command.extend(['loss', f'{pkt_loss}%'])
-    
-    try:
-        run_subprocess(command)
-        print(f"Successfully updated qdisc: {' '.join(command)}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error updating qdisc: {e}")
-        sys.exit(1)
 
 def stop_nginx():
     """Stop any running nginx processes."""
@@ -118,13 +101,10 @@ if __name__ == "__main__":
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])
 
-    # Change qdisc to initial state
-    change_qdisc()
-
     # Listen until client is done
     listen_for_client_completion()
 
-    
+
 
     
 
