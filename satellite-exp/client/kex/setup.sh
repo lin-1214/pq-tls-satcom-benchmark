@@ -3,6 +3,9 @@
 
 ROOT="$(dirname $(pwd))"
 
+OPENSSL=${ROOT}/tmp/openssl/apps/openssl
+OPENSSL_CNF=${ROOT}/tmp/openssl/apps/openssl.cnf
+
 ##########################
 # Build s_timer
 ##########################
