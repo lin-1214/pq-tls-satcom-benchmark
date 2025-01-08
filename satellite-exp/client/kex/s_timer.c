@@ -13,32 +13,57 @@
 
 #include <time.h>
 #include <string.h>
-#include <jansson.h>
+#include <cjson/cJSON.h> 
 
 #define NS_IN_MS 1000000.0
 #define MS_IN_S 1000
 
 char* get_host_from_config(void) {
-    json_error_t error;
-    json_t* root = json_load_file("../config.json", 0, &error);
+    // Read the file
+    FILE* fp = fopen("../config.json", "r");
+    if (!fp) {
+        fprintf(stderr, "Error opening config file\n");
+        return NULL;
+    }
+
+    // Get file size
+    fseek(fp, 0, SEEK_END);
+    long file_size = ftell(fp);
+    rewind(fp);
+
+    // Read file content
+    char* json_string = malloc(file_size + 1);
+    fread(json_string, 1, file_size, fp);
+    json_string[file_size] = '\0';
+    fclose(fp);
+
+    // Parse JSON
+    cJSON* root = cJSON_Parse(json_string);
+    free(json_string);
+    
     if (!root) {
-        fprintf(stderr, "Error loading config: %s\n", error.text);
+        const char* error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr) {
+            fprintf(stderr, "Error parsing JSON before: %s\n", error_ptr);
+        }
         return NULL;
     }
 
-    const char* server_ip = json_string_value(json_object_get(root, "server_ip"));
-    const char* tls_port = json_string_value(json_object_get(root, "tls_port"));
+    // Get values
+    cJSON* server_ip = cJSON_GetObjectItem(root, "server_ip");
+    cJSON* tls_port = cJSON_GetObjectItem(root, "tls_port");
     
-    if (!server_ip || !tls_port) {
+    if (!cJSON_IsString(server_ip) || !cJSON_IsString(tls_port)) {
         fprintf(stderr, "Missing server_ip or tls_port in config\n");
-        json_decref(root);
+        cJSON_Delete(root);
         return NULL;
     }
 
-    char* host = malloc(strlen(server_ip) + strlen(tls_port) + 2);
-    sprintf(host, "%s:%s", server_ip, tls_port);
+    // Combine host and port
+    char* host = malloc(strlen(server_ip->valuestring) + strlen(tls_port->valuestring) + 2);
+    sprintf(host, "%s:%s", server_ip->valuestring, tls_port->valuestring);
     
-    json_decref(root);
+    cJSON_Delete(root);
     return host;
 }
 
