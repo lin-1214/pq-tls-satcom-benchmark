@@ -112,6 +112,6 @@ if __name__ == "__main__":
     # Listen for both completion messages with a single socket
     listen_for_client_completion(2)
 
-    
+    stop_nginx()
 
 
