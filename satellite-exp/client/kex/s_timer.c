@@ -53,8 +53,8 @@ char* get_host_from_config(void) {
     cJSON* server_ip = cJSON_GetObjectItem(root, "server_ip");
     cJSON* tls_port = cJSON_GetObjectItem(root, "tls_port");
 
-    printf("Server IP: %s\n", server_ip->valuestring);
-    printf("TLS Port: %s\n", tls_port->valuestring);
+    // printf("Server IP: %s\n", server_ip->valuestring);
+    // printf("TLS Port: %s\n", tls_port->valuestring);
     
     if (!cJSON_IsString(server_ip) || !cJSON_IsString(tls_port)) {
         fprintf(stderr, "Missing server_ip or tls_port in config\n");
@@ -114,7 +114,7 @@ SSL* do_tls_handshake(SSL_CTX* ssl_ctx, const char* host)
 
 int main(int argc, char* argv[])
 {   
-    printf("Start s_timer.c\n");
+    // printf("Start s_timer.c\n");
     int ret = -1;
     SSL_CTX* ssl_ctx = 0;
     if(argc != 3)
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
         goto end;
     }
 
-    printf("Host: %s\n", host);
+    // printf("Host: %s\n", host);
 
     struct timespec start, finish;
     double* handshake_times_ms = malloc(measurements_to_make * sizeof(*handshake_times_ms));
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
     {
         printf("%f,", handshake_times_ms[i]);
     }
-    printf("%f", handshake_times_ms[measurements - 1]);
+    // printf("%f", handshake_times_ms[measurements - 1]);
     printf("\n");
 
     ret = 0;

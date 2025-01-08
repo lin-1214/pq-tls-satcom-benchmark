@@ -8,6 +8,8 @@ ROOT="$(dirname $(pwd))"
 NGINX_APP=${ROOT}/tmp/nginx/sbin/nginx
 NGINX_CONF_DIR=${ROOT}/tmp/nginx/conf
 
+cp ${ROOT}/kex/nginx.conf ${NGINX_CONF_DIR}/nginx.conf
+
 for SIG in "ecdsap256" "dilithium2";
 do
     # Ask nginx to use ${SIG} cert and key
