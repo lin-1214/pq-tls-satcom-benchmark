@@ -12,7 +12,9 @@ apt install -y git \
                libssl-dev \
                libpcre3-dev \
                wget \
-               python3-pip
+               python3-pip \
+               libcjson1 \
+               libcjson-dev
 
 pip3 install tqdm
 
