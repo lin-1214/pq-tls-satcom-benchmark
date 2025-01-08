@@ -15,6 +15,7 @@ apt install -y git \
                python3-pip
 
 pip3 install tqdm
+sudo apt-get install libjansson-dev
 
 NGINX_VERSION=1.17.5
 CMAKE_VERSION=3.18

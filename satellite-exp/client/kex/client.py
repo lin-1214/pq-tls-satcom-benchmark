@@ -8,17 +8,18 @@ import json
 # Network configuration constants
 SERVER_IP = None
 CLIENT_IP = None
+SERVER_PORT = None
 
 # Read network configuration from config file
 with open('../config.json') as f:
     config = json.load(f)
     SERVER_IP = config['server_ip']
     CLIENT_IP = config['client_ip']
+    SERVER_PORT = config['socket_port']
 
 
 NETMASK = "24"
 INTERFACE = "eth0"
-SERVER_PORT = 8000  
 MEASUREMENTS_PER_TIMER = 100
 TIMERS = 50
 

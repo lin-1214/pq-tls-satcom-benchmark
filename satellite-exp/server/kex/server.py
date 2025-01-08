@@ -12,10 +12,11 @@ SERVER_IP = None
 with open('../config.json') as f:
     config = json.load(f)
     SERVER_IP = config['server_ip']
+    SERVER_PORT = config['socket_port']
 
 NETMASK = "24"
 INTERFACE = "eth0"
-SERVER_PORT = 8000
+
 
 def run_subprocess(command, working_dir='.', expected_returncode=0):
     result = subprocess.run(

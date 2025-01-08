@@ -12,13 +12,37 @@
 #include <openssl/err.h>
 
 #include <time.h>
+#include <string.h>
+#include <jansson.h>
 
 #define NS_IN_MS 1000000.0
 #define MS_IN_S 1000
 
-const char* host = "192.168.50.55:4433";
+char* get_host_from_config(void) {
+    json_error_t error;
+    json_t* root = json_load_file("../config.json", 0, &error);
+    if (!root) {
+        fprintf(stderr, "Error loading config: %s\n", error.text);
+        return NULL;
+    }
 
-SSL* do_tls_handshake(SSL_CTX* ssl_ctx)
+    const char* server_ip = json_string_value(json_object_get(root, "server_ip"));
+    const char* tls_port = json_string_value(json_object_get(root, "tls_port"));
+    
+    if (!server_ip || !tls_port) {
+        fprintf(stderr, "Missing server_ip or tls_port in config\n");
+        json_decref(root);
+        return NULL;
+    }
+
+    char* host = malloc(strlen(server_ip) + strlen(tls_port) + 2);
+    sprintf(host, "%s:%s", server_ip, tls_port);
+    
+    json_decref(root);
+    return host;
+}
+
+SSL* do_tls_handshake(SSL_CTX* ssl_ctx, const char* host)
 {
     BIO* conn;
     SSL* ssl;
@@ -77,6 +101,12 @@ int main(int argc, char* argv[])
     const SSL_METHOD* ssl_meth = TLS_client_method();
     SSL* ssl = NULL;
 
+    char* host = get_host_from_config();
+    if (!host) {
+        fprintf(stderr, "Failed to get host from config\n");
+        goto end;
+    }
+
     struct timespec start, finish;
     double* handshake_times_ms = malloc(measurements_to_make * sizeof(*handshake_times_ms));
 
@@ -124,7 +154,7 @@ int main(int argc, char* argv[])
     while(measurements < measurements_to_make)
     {
         clock_gettime(CLOCK_MONOTONIC_RAW, &start);
-        ssl = do_tls_handshake(ssl_ctx);
+        ssl = do_tls_handshake(ssl_ctx, host);
         clock_gettime(CLOCK_MONOTONIC_RAW, &finish);
         if (!ssl)
         {
@@ -164,5 +194,6 @@ ossl_error:
     ERR_print_errors_fp(stderr);
 end:
     SSL_CTX_free(ssl_ctx);
+    free(host);
     return ret;
 }
