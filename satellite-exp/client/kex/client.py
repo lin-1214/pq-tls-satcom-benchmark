@@ -15,7 +15,7 @@ with open('../config.json') as f:
     config = json.load(f)
     SERVER_IP = config['server_ip']
     CLIENT_IP = config['client_ip']
-    SERVER_PORT = config['socket_port']
+    SERVER_PORT = int(config['socket_port'])
 
 
 NETMASK = "24"
