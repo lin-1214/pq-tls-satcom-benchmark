@@ -10,6 +10,7 @@
     - `Server`: 192.168.50.55
     - `Client`: 192.168.50.54
     - Nginx server run on port 4433
+    - Socket run on port 8000
 
 ## Steps to run the server
 1. Install ubuntu pre-requisites.
@@ -23,6 +24,8 @@
         ```json
         "server_ip": "<your_server_ip>"
         "client_ip": "<your_client_ip>"
+        "tls_port": "<choose_server_port>"
+        "socket_port": "<choose_socket_port>"
         ```
    - `nginx.conf`: 
         ```nginx
@@ -51,16 +54,14 @@
    ```
 
 
-2. Modify IP address in `config.json`, and `s_timer.c` file.
+2. Modify IP address in `config.json` file.
    - `config.json`: 
      ```json
      "server_ip": "<your_server_ip>"
      "client_ip": "<your_client_ip>"
+     "tls_port": "<choose_server_port>"
+     "socket_port": "<choose_socket_port>"
      ```
-   - `s_timer.c`: 
-        ```c
-        const char* host = "<your_server_ip>:<choose_server_port>";
-        ```
 
 3. Set up client environment, choose the algorithm you want to test.
     ```bash
