@@ -1,5 +1,5 @@
 ROOT="$(dirname $(pwd))"
-CLIENT_DIR="~/Desktop/pq-tls-benchmark/satellite-exp/client/sig/"
+CLIENT_DIR="~/Desktop/pq-tls-satcom-benchmark/satellite-exp/client/sig/"
 
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <client_ip>"

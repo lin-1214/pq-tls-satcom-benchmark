@@ -93,20 +93,20 @@ def send_completion_message():
     except Exception as e:
         print(f"❌ Error sending completion message: {e}")
 
-def time_handshake(kex_alg, measurements):
+def time_handshake(sig_alg, measurements):
     """Run handshake timing test from a Mininet host."""
-    result = run_subprocess(["./s_timer.o", kex_alg, str(measurements)])
+    result = run_subprocess(["./s_timer.o", sig_alg, str(measurements)])
     result = result.replace("\r", "")
     result = result.replace("\n", "")
 
     return [float(i) for i in result.split(",") if i != ""]
 
 
-def run_timers(kex_alg):
+def run_timers(sig_alg):
     """Run multiple timer measurements for a key exchange algorithm in parallel."""
     results = []
     for _ in tqdm(range(TIMERS), desc="Running timers"):
-        results.extend(time_handshake(kex_alg, MEASUREMENTS_PER_TIMER))
+        results.extend(time_handshake(sig_alg, MEASUREMENTS_PER_TIMER))
     return results
 
 if __name__ == "__main__":

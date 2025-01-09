@@ -121,8 +121,13 @@ int main(int argc, char* argv[])
     const size_t measurements_to_make = strtol(argv[2], 0, 10);
     size_t measurements = 0;
 
+    // const char* sig_alg = argv[1];
+    // char CA_cert[100] = { 0 };
+
     const char* sig_alg = argv[1];
     char CA_cert[100] = { 0 };
+    snprintf(CA_cert, 100, "./%s_CA.crt", sig_alg);
+
     const char* ciphersuites = "TLS_AES_256_GCM_SHA384";
     const SSL_METHOD* ssl_meth = TLS_client_method();
     SSL* ssl = NULL;
@@ -164,7 +169,7 @@ int main(int argc, char* argv[])
         goto ossl_error;
     }
 
-    ret = SSL_CTX_load_verify_locations(ssl_ctx, "./CA.crt", 0);
+    ret = SSL_CTX_load_verify_locations(ssl_ctx, CA_cert, 0);
     if(ret <= 0)
     {
         goto ossl_error;

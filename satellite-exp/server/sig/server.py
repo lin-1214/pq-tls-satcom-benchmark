@@ -79,6 +79,7 @@ def stop_nginx():
 def listen_for_client_completion(message_count=2):
     """Listen for multiple completion messages from client"""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((SERVER_IP, SERVER_PORT))
         server_socket.listen()
         
@@ -112,6 +113,11 @@ if __name__ == "__main__":
     # Listen for both completion messages with a single socket
     listen_for_client_completion(2)
 
+    # Stop nginx
+    stop_nginx()
+
+
     
+
 
 
