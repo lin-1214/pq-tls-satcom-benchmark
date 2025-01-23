@@ -46,7 +46,7 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
         ax1.set_title(f'Median Handshake Time vs Packet Loss - RTT: {label}')
         ax1.grid(True)
         ax1.legend(prop={'size': 12})
-        ax1.set_ylim(0, 10000)
+        ax1.set_ylim(0, 14000)
         
         # Do the same for 95th percentile plot
         for col in handshake_time_trad.columns:
@@ -64,7 +64,7 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
         ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
         ax2.grid(True)
         ax2.legend(prop={'size': 12})
-        ax2.set_ylim(0, 10000)
+        ax2.set_ylim(0, 14000)
         
     elif type == 'sig':
         # Similar updates for signature plots
@@ -83,7 +83,7 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
         ax1.set_title(f'Median Handshake Time vs Packet Loss - RTT: {label}')
         ax1.grid(True)
         ax1.legend(prop={'size': 12})
-        ax1.set_ylim(0, 10000)
+        ax1.set_ylim(0, 14000)
         
         for col in handshake_time_pq.columns:
             ax2.scatter(pkt_loss, handshake_time_pq[col], alpha=0.05, color='blue', s=10)
@@ -100,7 +100,7 @@ def plot_data(pkt_loss, handshake_time_pq, handshake_time_trad, type, label=None
         ax2.set_title(f'95th Percentile Handshake Time vs Packet Loss - RTT: {label}')
         ax2.grid(True)
         ax2.legend(prop={'size': 12})
-        ax2.set_ylim(0, 10000)
+        ax2.set_ylim(0, 14000)
 
     plt.tight_layout()
     return plt
@@ -121,9 +121,9 @@ def save_plot(plt, output_filename):
     plt.close()
 
 
-KEX_RTT = ['6p164ms', '31p749ms', '79p188ms', '196p425ms', '596p551ms'] # ms
-SIG_RTT_D = ['6p306ms', '31p844ms', '79p216ms', '196p489ms', '616p549ms'] # ms
-SIG_RTT_E = ['6p282ms', '31p702ms', '79p217ms', '196p182ms', '616p504ms']
+KEX_RTT = ['6p029ms', '31p654ms', '79p322ms', '196p246ms', '596p401ms'] # ms
+SIG_RTT_D = ['6p464ms', '31p677ms', '79p294ms', '196p273ms', '600p335ms'] # ms
+SIG_RTT_E = ['6p228ms', '31p904ms', '79p345ms', '196p503ms', '600p393ms']
 
 DATA_FILE = '../../mn_data'
 

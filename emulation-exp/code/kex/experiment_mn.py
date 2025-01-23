@@ -9,7 +9,7 @@ import sys
 from tqdm import tqdm
 
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 10
+TIMERS = 50
 # POOL_SIZE = 4
 
 client = None
@@ -36,11 +36,11 @@ def test_connection(client, server):
         net.stop()
         sys.exit(1)
 
-def change_qdisc(host, intf, pkt_loss, delay):
-    """Apply packet loss and delay using NetEm in Mininet."""
+def change_qdisc(host, intf, pkt_loss, delay, bandwidth):
+    """Apply packet loss, delay, and bandwidth using NetEm in Mininet."""
     command = (
         f"tc qdisc change dev {intf} root netem "
-        f"limit 1000 delay {delay} rate 1000mbit"
+        f"limit 1000 delay {delay} rate {bandwidth}mbit"
     )
     if pkt_loss > 0:
         command += f" loss {pkt_loss}%"
@@ -54,7 +54,7 @@ def time_handshake(kex_alg, measurements):
     result = result.replace("\r", "")
     result = result.replace("\n", "")
 
-    print(f"[DEBUG] Result: {result}")
+    # print(f"[DEBUG] Result: {result}")
 
     return [float(i) for i in result.split(",") if i != ""]
 
@@ -115,22 +115,24 @@ if __name__ == "__main__":
         os.makedirs("../../mn_data/kex")
 
     # Experiment loop
-    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms"]:
-        # Configure base delay
-        change_qdisc(client, "h2-eth0", 0, latency_ms)
-        change_qdisc(server, "h1-eth0", 0, latency_ms)
+    for latency_ms in ["2.684ms", "15.458ms", "39.224ms", "97.73ms", "297.73ms"]:
+        # Configure base delay with different bandwidths for client and server
+        client_bandwidth = 100  # 100 Mbps DL
+        server_bandwidth = 20  # 20 Mbps UL
+        change_qdisc(client, "h2-eth0", 0, latency_ms, client_bandwidth)
+        change_qdisc(server, "h1-eth0", 0, latency_ms, server_bandwidth)
         rtt_str = get_rtt_ms(client, server)
         print(f"✅ RTT measurement success! RTT: {rtt_str}")
 
-        for kex_alg in ["prime256v1", "p256_kyber512_90s"]:
+        for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_kyber768_90s", "p256_kyber1024_90s"]:
             # Open CSV file for results
             with open(f"../../mn_data/kex/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
                 csv_writer = csv.writer(out_file)
 
                 # Test different packet loss rates
-                for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 13)):
-                    change_qdisc(client, "h2-eth0", pkt_loss, latency_ms)
-                    change_qdisc(server, "h1-eth0", pkt_loss, latency_ms)
+                for pkt_loss in [0, 0.1, 0.5, 1, 1.5, 2, 2.5, 3] + list(range(4, 21)):
+                    change_qdisc(client, "h2-eth0", pkt_loss, latency_ms, client_bandwidth)
+                    change_qdisc(server, "h1-eth0", pkt_loss, latency_ms, server_bandwidth)
 
                     # Measure handshake times
                     results = run_timers(kex_alg)

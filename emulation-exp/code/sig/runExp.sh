@@ -13,7 +13,7 @@ NGINX_CONF_DIR=${ROOT}/tmp/nginx/conf
 ##########################
 # set -e
 
-for SIG in "ecdsap256" "dilithium2";
+for SIG in "ecdsap256" "dilithium2" "dilithium3" "dilithium5";
 do
     # Ask nginx to use ${SIG} cert and key
     sed "s/??SERVER_CERT??/${SIG}_server.crt/g; s/??SERVER_KEY??/${SIG}_server.key/g" nginx.conf > ${NGINX_CONF_DIR}/nginx.conf
