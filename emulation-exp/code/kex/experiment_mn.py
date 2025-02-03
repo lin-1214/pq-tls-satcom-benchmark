@@ -9,7 +9,7 @@ import sys
 from tqdm import tqdm
 
 MEASUREMENTS_PER_TIMER = 100
-TIMERS = 50
+TIMERS = 10
 # POOL_SIZE = 4
 
 client = None
