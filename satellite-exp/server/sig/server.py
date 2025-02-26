@@ -105,7 +105,7 @@ if __name__ == "__main__":
     stop_nginx()
 
     # Configure network before starting nginx
-    configure_network_interface()
+    # configure_network_interface()
 
     # Start nginx
     subprocess.run([nginx_path, "-c", nginx_conf_dir])

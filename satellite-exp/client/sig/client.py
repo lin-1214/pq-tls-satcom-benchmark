@@ -118,7 +118,7 @@ if __name__ == "__main__":
     sig_alg = sys.argv[1]
 
     # Configure network interface first
-    configure_network_interface()
+    # configure_network_interface()
     
     # Measure RTT
     rtt_str = get_rtt_ms()

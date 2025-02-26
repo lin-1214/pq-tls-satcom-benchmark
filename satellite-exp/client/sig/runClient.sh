@@ -5,7 +5,7 @@ echo "Running signature experiment... ⚡"
 
 ROOT="$(dirname $(pwd))"
 
-for SIG in "ecdsap256" "dilithium2";
+for SIG in "ecdsap256" "dilithium2" "dilithium3";
 do
     # Run experiment
     sudo python3 ${ROOT}/sig/client.py ${SIG}

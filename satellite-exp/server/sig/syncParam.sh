@@ -24,3 +24,8 @@ sudo scp "${ROOT}/tmp/nginx/conf/dilithium2_CA.crt" "client@${CLIENT_IP}:${CLIEN
     echo "Error: Failed to copy dilithium2_CA.key"
     exit 1
 }
+
+sudo scp "${ROOT}/tmp/nginx/conf/dilithium3_CA.crt" "client@${CLIENT_IP}:${CLIENT_DIR}" || {
+    echo "Error: Failed to copy dilithium3_CA.key"
+    exit 1
+}

@@ -113,7 +113,7 @@ def run_timers(kex_alg):
 
 if __name__ == "__main__":
     # Configure network interface first
-    configure_network_interface()
+    # configure_network_interface()
     
     # Measure RTT
     rtt_str = get_rtt_ms()
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     if not os.path.exists("../../sat_data/kex"):
         os.makedirs("../../sat_data/kex")
 
-    for kex_alg in ["prime256v1", "p256_kyber512_90s"]:
+    for kex_alg in ["prime256v1", "p256_kyber512_90s", "p256_kyber768_90s", "p256_kyber1024_90s"]:
         results = run_timers(kex_alg)
         with open(f"../../sat_data/kex/{kex_alg}_{rtt_str}ms.csv", "w") as out_file:
             csv_writer = csv.writer(out_file)
