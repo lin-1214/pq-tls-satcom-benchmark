@@ -8,6 +8,8 @@ tags
 emulation-exp/code/tmp/
 emulation-exp/code/kex/data
 emulation-exp/code/sig/data
+emulation-exp/mn_data
+satellite-exp/sat_data
 
 # Common system files
 .DS_Store
